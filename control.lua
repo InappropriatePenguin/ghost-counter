@@ -82,7 +82,10 @@ function on_entity_logistic_slot_changed(event)
     -- Exit if event does not involve a player character
     if event.entity.type ~= "character" then return end
 
-    local player_index = event.entity.player.index
+    local player = event.entity.player or event.entity.associated_player
+    if not player then return end
+
+    local player_index = player.index
     local playerdata = get_make_playerdata(player_index)
 
     -- Iterate over known one-time logistic requests to see if the event concerns any of them

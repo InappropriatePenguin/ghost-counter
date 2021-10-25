@@ -149,7 +149,7 @@ function get_first_empty_slot(player_index)
     local character = playerdata.luaplayer.character
     if not character then return end
 
-    for slot_index = 1, character.request_slot_count+1 do
+    for slot_index = 1, character.request_slot_count + 1 do
         local slot = playerdata.luaplayer.get_personal_logistic_slot(slot_index)
         if slot.name == nil then return slot_index end
     end
