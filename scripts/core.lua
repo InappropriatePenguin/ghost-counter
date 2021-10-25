@@ -57,6 +57,7 @@ function get_required_counts(entities)
                         name=item.name,
                         type="item",
                         count=0,
+                        inventory=0,
                         logistic_request={}
                     }
                 requests[item.name].count = requests[item.name].count + (ghost.count * item.count)
@@ -202,7 +203,10 @@ function make_one_time_logistic_request(player_index, request)
     }
 
     -- Actually modify personal logistic slot
-    playerdata.luaplayer.set_personal_logistic_slot(slot_index, new_slot)
+    local is_successful = playerdata.luaplayer.set_personal_logistic_slot(slot_index, new_slot)
+
+    -- Delete one-time logistic request reference if it wasn't successfully set
+    if not is_successful then playerdata.logistic_requests[request.name] = nil end
 end
 
 ---Restores the prior logistic request (if any) that was in place before the one-time request was

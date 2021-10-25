@@ -70,6 +70,7 @@ script.on_event(defines.events.on_player_alt_selected_area, on_player_selected_a
 function on_player_main_inventory_changed(event)
     local playerdata = get_make_playerdata(event.player_index)
     if not playerdata.is_active then return end
+    if playerdata.luaplayer.controller_type ~= defines.controllers.character then return end
 
     update_inventory_info(event.player_index)
     update_one_time_logistic_requests(event.player_index)
@@ -105,6 +106,8 @@ function on_entity_logistic_slot_changed(event)
 
         -- If slot contents are relevant to one of the requests, update the logistic request values
         if playerdata.job.requests[slot.name] then
+            if not playerdata.job.requests[slot.name].logistic_request then
+                game.print(serpent.block(playerdata.job.requests)) end
             playerdata.job.requests[slot.name].logistic_request.slot_index = event.slot_index
             playerdata.job.requests[slot.name].logistic_request.min = slot.min
             playerdata.job.requests[slot.name].logistic_request.slot_index = slot.max
