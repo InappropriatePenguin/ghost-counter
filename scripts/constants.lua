@@ -10,6 +10,10 @@ NAME = {
     input = {
         ghost_counter = mod_prefix .. "hotkey"
     },
+    sprite = {
+        hide_empty_white = mod_prefix .. "hide-empty-white",
+        hide_empty_black = mod_prefix .. "hide-empty-black"
+    },
     gui = {
         root_frame = mod_prefix .. "root-frame",
         close_button = mod_prefix .. "close-button",
@@ -18,6 +22,8 @@ NAME = {
     style = {
         root_frame = mod_prefix .. "root-frame",
         titlebar_space_header = mod_prefix .. "titlebar-space-header",
+        titlebar_button = mod_prefix .. "titlebar-button",
+        titlebar_button_active = mod_prefix .. "titlebar-button-active",
         inside_deep_frame = mod_prefix .. "inside-deep-frame",
         scroll_pane = mod_prefix .. "scroll-pane",
         row_frame = mod_prefix .. "row-frame",

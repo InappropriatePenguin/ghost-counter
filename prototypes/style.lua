@@ -13,6 +13,18 @@ guistyle[NAME.style.titlebar_space_header] = {
     right_margin=4
 }
 
+guistyle[NAME.style.titlebar_button] = {
+    type="button_style",
+    parent="frame_action_button"
+}
+
+guistyle[NAME.style.titlebar_button_active] = {
+    type="button_style",
+    parent="frame_action_button",
+    default_graphical_set = guistyle["frame_button"].clicked_graphical_set,
+    clicked_graphical_set = guistyle["frame_button"].default_graphical_set
+}
+
 guistyle[NAME.style.inside_deep_frame] = {
     type="frame_style",
     parent="inside_deep_frame",

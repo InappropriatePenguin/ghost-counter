@@ -39,5 +39,23 @@ data:extend{
         key_sequence="ALT + G",
         action="spawn-item",
         item_to_spawn=NAME.tool.ghost_counter
+    }, {
+        type = "sprite",
+        name = NAME.sprite.hide_empty_white,
+        filename = "__ghost-counter__/graphics/hide_white.png",
+        priority = "medium",
+        width = 32,
+        height = 32,
+        flags = {"gui-icon"},
+        scale = 0.5
+    }, {
+        type = "sprite",
+        name = NAME.sprite.hide_empty_black,
+        filename = "__ghost-counter__/graphics/hide_black.png",
+        priority = "medium",
+        width = 32,
+        height = 32,
+        flags = {"gui-icon"},
+        scale = 0.5
     }
 }
