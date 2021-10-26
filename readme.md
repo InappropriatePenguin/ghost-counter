@@ -18,5 +18,5 @@ You can download it from the Factorio
 
 ## Credits
 
-Ghost icon: "Ghost" by Andres Flores from the Noun Project
+Ghost icon: "Ghost" by Andres Flores from the Noun Project  
 Hide empty requests button: "hide" by Adrien Coquet from the Noun Project
