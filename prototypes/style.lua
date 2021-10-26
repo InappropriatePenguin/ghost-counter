@@ -1,7 +1,13 @@
 local guistyle = data.raw["gui-style"]["default"]
 
 guistyle[NAME.style.root_frame] = {
-    type="frame_style"
+    type="frame_style",
+    width=422
+}
+
+guistyle[NAME.style.titlebar_flow] = {
+    type="horizontal_flow_style",
+    horizontal_spacing=8
 }
 
 guistyle[NAME.style.titlebar_space_header] = {
@@ -35,10 +41,12 @@ guistyle[NAME.style.inside_deep_frame] = {
 guistyle[NAME.style.scroll_pane] = {
     type="scroll_pane_style",
     parent="scroll_pane",
-    top_padding=0,
-    bottom_padding=0,
-    left_padding=0,
-    right_padding=0,
+    padding=2,
+    extra_top_padding_when_activated=0,
+    extra_left_padding_when_activated=0,
+    extra_bottom_padding_when_activated=0,
+    extra_right_padding_when_activated=0,
+    extra_margin_when_activated=0,
     maximal_height=500,
     horizontally_stretchable="stretch_and_expand",
     vertically_stretchable="stretch_and_expand",
