@@ -48,12 +48,16 @@ function Gui.make_gui(player_index)
     do
         local resolution = playerdata.luaplayer.display_resolution
         local x = 50
-        local y = resolution.height / 2 - 300
+        local y = (resolution.height / 2) - 300
         playerdata.gui.root.location = {x, y}
     end
 
     -- Create title bar
-    local titlebar_flow = playerdata.gui.root.add{type="flow", direction="horizontal"}
+    local titlebar_flow = playerdata.gui.root.add{
+        type="flow",
+        direction="horizontal",
+        style=NAME.style.titlebar_flow
+    }
     titlebar_flow.drag_target = playerdata.gui.root
     titlebar_flow.add{
         type="label",
@@ -66,11 +70,23 @@ function Gui.make_gui(player_index)
         ignored_by_interaction=true,
         style=NAME.style.titlebar_space_header
     }
+
+    local hide_empty = playerdata.options.hide_empty_requests
+    titlebar_flow.add{
+        type="sprite-button",
+        name=NAME.gui.hide_empty_button,
+        tooltip={"gui.ghost-counter-hide-empty-requests"},
+        sprite=hide_empty and NAME.sprite.hide_empty_black or NAME.sprite.hide_empty_white,
+        hovered_sprite=NAME.sprite.hide_empty_black,
+        clicked_sprite=hide_empty and NAME.sprite.hide_empty_white or NAME.sprite.hide_empty_black,
+        style=hide_empty and NAME.style.titlebar_button_active or NAME.style.titlebar_button
+    }
     titlebar_flow.add{
         type="sprite-button",
         name=NAME.gui.close_button,
         sprite="utility/close_white",
         hovered_sprite="utility/close_black",
+        clicked_sprite="utility/close_black",
         style="close_button"
     }
 
@@ -84,20 +100,102 @@ function Gui.make_gui(player_index)
     Gui.make_list(player_index)
 end
 
----Creates/re-creates the list of request frames in the GUI
+---Creates the list of request frames in the GUI
 ---@param player_index number Player index
 function Gui.make_list(player_index)
     local playerdata = get_make_playerdata(player_index)
-    local parent = playerdata.gui.requests_container
-    local requests = playerdata.job.requests_sorted
-
-    playerdata.gui.requests = {}
-
-    -- Destroy any child elements in parent scroll pane
-    if parent then parent.clear() end
 
     -- Create a new row frame for each request
-    for _, request in pairs(requests) do Gui.make_row(player_index, request) end
+    playerdata.gui.requests = {}
+    for _, request in pairs(playerdata.job.requests_sorted) do
+        Gui.make_row(player_index, request)
+    end
+end
+
+---Returns request button properties based on request fulfillment and other criteria
+---@param request table `request` table
+---@param one_time_request table `playerdata.logistic_requests[request.name]`
+---@return boolean enabled Whehter button should be enabled
+---@return string style Style that should be applied to the button
+function make_request_button_properties(request, one_time_request)
+    local logistic_request = request.logistic_request or {}
+
+    local enabled = ((logistic_request.min or 0) < request.count) or one_time_request and true or
+                        false
+    local style =
+        ((logistic_request.min or 0) < request.count) and NAME.style.ghost_request_button or
+            NAME.style.ghost_request_active_button
+
+    return enabled, style
+end
+
+---Updates the list of request frames in the GUI
+---@param player_index number Player index
+function Gui.update_list(player_index)
+    local playerdata = get_make_playerdata(player_index)
+
+    local indices = {count=1, sprite=2, label=3, inventory=4, request=5}
+
+    -- Destroy any child elements in parent scroll pane
+    for name, frame in pairs(playerdata.gui.requests) do
+        local request = playerdata.job.requests[name]
+
+        if request.count > 0 or not playerdata.options.hide_empty_requests then
+            frame.visible = true
+            -- Update ghost count
+            frame.children[indices.count].caption = request.count
+
+            -- Update amont in inventory
+            frame.children[indices.inventory].caption = request.inventory
+
+            -- Calculate amount missing
+            local diff = request.count - request.inventory
+
+            -- If amount needed exceeds amount in inventory, show request button
+            local request_element = frame.children[indices.request]
+            if diff > 0 then
+                local enabled, style = make_request_button_properties(request,
+                                           playerdata.logistic_requests[request.name])
+
+                if request_element.type == "button" then
+                    request_element.enabled = enabled
+                    request_element.style = style
+                    request_element.caption = diff
+                    request_element.tooltip = enabled and
+                                                  {"gui.ghost-counter-set-temporary-request"} or
+                                                  {"gui.ghost-counter-existing-logistic-request"}
+                else
+                    frame.children[indices.request].destroy()
+                    frame.add{
+                        type="button",
+                        caption=diff,
+                        enabled=enabled,
+                        style=style,
+                        tooltip=enabled and {"gui.ghost-counter-set-temporary-request"} or
+                            {"gui.ghost-counter-existing-logistic-request"},
+                        tags={ghost_counter_request=request.name}
+                    }
+                end
+                -- Otherwise create request-fulfilled checkmark previous element was a request button
+            elseif request_element.type == "button" then
+                request_element.destroy()
+
+                local sprite_container = frame.add{
+                    type="flow",
+                    direction="horizontal",
+                    style=NAME.style.ghost_request_fulfilled_flow
+                }
+                sprite_container.add{
+                    type="sprite",
+                    sprite="utility/check_mark_white",
+                    resize_to_sprite=false,
+                    style=NAME.style.ghost_request_fulfilled_sprite
+                }
+            end
+        else
+            frame.visible = false
+        end
+    end
 end
 
 ---Generates the row frame for a given request table
@@ -135,22 +233,24 @@ function Gui.make_row(player_index, request)
     -- Amount in inventory
     frame.add{type="label", caption=request.inventory, style=NAME.style.inventory_number_label}
 
-    -- One-time request button or request fulfilled flow/sprite
+    -- Calculate amount missing
     local diff = request.count - request.inventory
+
+    -- Show one-time request logistic button
     if diff > 0 then
-        local logistic_request = request.logistic_request or {}
-        local enabled = ((logistic_request.min or 0) < request.count) or
-                            playerdata.logistic_requests[request.name] and true or false
-        local style = ((logistic_request.min or 0) < request.count) and
-                          NAME.style.ghost_request_button or NAME.style.ghost_request_active_button
+        local enabled, style = make_request_button_properties(request,
+                                   playerdata.logistic_requests[request.name])
+
         frame.add{
             type="button",
             caption=diff,
             enabled=enabled,
             style=style,
-            tags={ghost_counter_request=request}
+            tooltip=enabled and {"gui.ghost-counter-set-temporary-request"} or
+                {"gui.ghost-counter-existing-logistic-request"},
+            tags={ghost_counter_request=request.name}
         }
-    else
+    else -- Show request fulfilled sprite
         local sprite_container = frame.add{
             type="flow",
             direction="horizontal",
@@ -163,6 +263,10 @@ function Gui.make_row(player_index, request)
             style=NAME.style.ghost_request_fulfilled_sprite
         }
     end
+
+    -- Hide frame if ghost count is 0 and player toggled hide empty requests
+    frame.visible = request.count > 0 or not playerdata.options.hide_empty_requests and true or
+                        false
 end
 
 ---Event handler for GUI button clicks
@@ -174,13 +278,27 @@ function Gui.on_gui_click(event)
         -- One-time logistic request button
     elseif event.element.tags and event.element.tags.ghost_counter_request then
         local playerdata = get_make_playerdata(event.player_index)
-        local request = event.element.tags.ghost_counter_request
-        if not playerdata.logistic_requests[request.name] then
-            make_one_time_logistic_request(event.player_index,
-                event.element.tags.ghost_counter_request)
+        local request_name = event.element.tags.ghost_counter_request
+        if not playerdata.logistic_requests[request_name] then
+            make_one_time_logistic_request(event.player_index, request_name)
+            Gui.update_list(event.player_index)
         else
-            restore_prior_logistic_request(event.player_index, request.name)
+            restore_prior_logistic_request(event.player_index, request_name)
+            Gui.update_list(event.player_index)
         end
+    elseif event.element.name == NAME.gui.hide_empty_button then
+        local playerdata = get_make_playerdata(event.player_index)
+        local new_state = not playerdata.options.hide_empty_requests
+        playerdata.options.hide_empty_requests = new_state
+
+        event.element.style = new_state and NAME.style.titlebar_button_active or
+                                  NAME.style.titlebar_button
+        event.element.sprite = new_state and NAME.sprite.hide_empty_black or
+                                   NAME.sprite.hide_empty_white
+        event.element.clicked_sprite = new_state and NAME.sprite.hide_empty_white or
+                                           NAME.sprite.hide_empty_black
+
+        Gui.update_list(event.player_index)
     end
 end
 script.on_event(defines.events.on_gui_click, Gui.on_gui_click)

@@ -10,17 +10,22 @@ NAME = {
     input = {
         ghost_counter = mod_prefix .. "hotkey"
     },
+    setting = {
+        min_update_interval = mod_prefix .. "min-update-interval"
+    },
     sprite = {
         hide_empty_white = mod_prefix .. "hide-empty-white",
         hide_empty_black = mod_prefix .. "hide-empty-black"
     },
     gui = {
         root_frame = mod_prefix .. "root-frame",
+        hide_empty_button = mod_prefix .. "hide-empty-requests-button",
         close_button = mod_prefix .. "close-button",
         scroll_pane = mod_prefix .. "scroll-pane"
     },
     style = {
         root_frame = mod_prefix .. "root-frame",
+        titlebar_flow = mod_prefix .. "titlebar-flow",
         titlebar_space_header = mod_prefix .. "titlebar-space-header",
         titlebar_button = mod_prefix .. "titlebar-button",
         titlebar_button_active = mod_prefix .. "titlebar-button-active",
