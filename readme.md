@@ -10,11 +10,13 @@ need. Your previous logistic request (if any) will be restored once that one-tim
 fulfilled.
 
 Use the mod selection tool by clicking on the ghost shortcut button in your toolbar or by using the
-keyboard shortcut (default Ctrl + G).
+keyboard shortcut (default Ctrl + G). Next, select the area containing the ghosts that you want to
+count. Holding shift during selection will include ghost tiles in the count.
 
 You can download it from the Factorio
 [Mod Portal](https://mods.factorio.com/mod/ghost-counter).
 
 ## Credits
 
-Ghost icon: Ghost by Andres Flores from the Noun Project
+Ghost icon: "Ghost" by Andres Flores from the Noun Project
+Hide empty requests button: "hide" by Adrien Coquet from the Noun Project
