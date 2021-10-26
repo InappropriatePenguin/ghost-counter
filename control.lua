@@ -50,7 +50,7 @@ function on_player_joined_game(event)
 
     if playerdata.is_active then register_inventory_monitoring(true) end
     if playerdata.is_active or table_size(playerdata.logistic_requests) > 0 then
-        register_logistic_slot_monitoring(true)
+        register_logistics_monitoring(true)
     end
 end
 script.on_event(defines.events.on_player_joined_game, on_player_joined_game)
@@ -58,8 +58,8 @@ script.on_event(defines.events.on_player_joined_game, on_player_joined_game)
 ---Re-evaluates whether event handlers should continue to be bound
 ---@param event table Event able
 function on_player_left_game(event)
-    if not is_any_player_active() then register_inventory_monitoring(false) end
-    if not is_any_player_waiting() then register_logistic_slot_monitoring(false) end
+    if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
+    if not is_logistics_monitoring_needed() then register_logistics_monitoring(false) end
 end
 script.on_event(defines.events.on_player_left_game, on_player_left_game)
 
@@ -68,8 +68,8 @@ script.on_event(defines.events.on_player_left_game, on_player_left_game)
 function on_player_removed(event)
     global.playerdata[event.player_index] = nil
 
-    if not is_any_player_active() then register_inventory_monitoring(false) end
-    if not is_any_player_waiting() then register_logistic_slot_monitoring(false) end
+    if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
+    if not is_logistics_monitoring_needed() then register_logistics_monitoring(false) end
 end
 script.on_event(defines.events.on_player_removed, on_player_removed)
 

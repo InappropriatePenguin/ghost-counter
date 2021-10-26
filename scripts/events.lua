@@ -89,6 +89,9 @@ function on_ghost_destroyed(event)
     end
 end
 
+---Handles `on_nth_tick`—processes data for players who have had data updates. Aborts and
+---unregisters itself if there were no data updates for any player since the previous function call
+---@param event table Event table
 function on_nth_tick(event)
     -- If no data updates happened over the last 5 ticks, unregister nth_tick handler and exit
     if event.tick - global.last_event > global.settings.min_update_interval then
@@ -104,19 +107,14 @@ function on_nth_tick(event)
             update_one_time_logistic_requests(player_index)
             update_logistics_info(player_index)
 
-            if table_size(playerdata.job.requests) > 0 then
-                Gui.update_list(player_index)
-            else
-                Gui.toggle(player_index, false)
-            end
+            Gui.update_list(player_index)
 
             -- Reset `has_updates` boolean for that player
             playerdata.has_updates = false
         end
     end
 
-    -- Check if logistic slot event handler can be unbound
-    if not is_any_player_active() and not is_any_player_waiting() then
-        register_logistic_slot_monitoring(false)
-    end
+    -- Check if event handlers can be unbound
+    if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
+    if not is_logistics_monitoring_needed() then register_logistics_monitoring(false) end
 end

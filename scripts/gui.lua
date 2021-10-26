@@ -13,7 +13,7 @@ function Gui.toggle(player_index, state)
         -- Create mod gui and register event handler
         Gui.make_gui(player_index)
         register_inventory_monitoring(true)
-        register_logistic_slot_monitoring(true)
+        register_logistics_monitoring(true)
     else
         playerdata.is_active = false
         playerdata.job = nil
@@ -24,8 +24,9 @@ function Gui.toggle(player_index, state)
             playerdata.gui = {}
         end
 
-        -- Unbind event hook if no player has GC open
-        if not is_any_player_active() then register_inventory_monitoring(false) end
+        -- Unbind event hooks if no no longer needed
+        if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
+        if not is_logistics_monitoring_needed() then register_logistics_monitoring(false) end
     end
 end
 

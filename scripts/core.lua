@@ -101,6 +101,8 @@ function get_required_counts(entities, ignore_tiles)
     return ghosts, requests
 end
 
+---Deletes requests with zero ghosts from the `job.requests` table
+---@param player_index number Player index
 function remove_empty_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
     for name, request in pairs(playerdata.job.requests) do
@@ -349,7 +351,7 @@ end
 
 ---Registers/unregisters event handlers for player logistic slot changes
 ---@param state boolean Determines whether to register or unregister event handlers
-function register_logistic_slot_monitoring(state)
+function register_logistics_monitoring(state)
     if state and not global.events.logistics then
         global.events.logistics = true
         script.on_event(defines.events.on_entity_logistic_slot_changed,
@@ -363,22 +365,20 @@ end
 ---Iterates over global playerdata table and determines whether any connected players have their
 ---mod GUI open.
 ---@return boolean
-function is_any_player_active()
+function is_inventory_monitoring_needed()
     for _, playerdata in pairs(global.playerdata) do
         if playerdata.is_active and playerdata.luaplayer.connected then return true end
     end
-
     return false
 end
 
 ---Iterates over the global playerdata table and checks to see if any one-time logistic requests
 ---are still unfulfilled.
 ---@return boolean
-function is_any_player_waiting()
+function is_logistics_monitoring_needed()
     for _, playerdata in pairs(global.playerdata) do
-        if playerdata.luaplayer.connected and table_size(playerdata.logistic_requests) > 0 then
-            return true
-        end
+        if (playerdata.is_active or table_size(playerdata.logistic_requests) > 0) and
+            playerdata.luaplayer.connected then return true end
     end
     return false
 end
