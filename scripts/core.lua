@@ -242,27 +242,27 @@ function make_one_time_logistic_request(player_index, name)
     local new_slot = {name=request.name, min=request.count}
     local slot_index = existing_request.slot_index or get_first_empty_slot(player_index)
 
-    -- Save details of change in playerdata so that it can be reverted later
-    playerdata.logistic_requests[request.name] = {
-        slot_index=slot_index,
-        old_min=existing_request.min,
-        old_max=existing_request.max,
-        new_min=request.count,
-        is_new=true
-    }
-
-    -- Update request's `logistic_request` table
-    request.logistic_request.slot_index = slot_index
-    request.logistic_request.min = request.count
-    request.logistic_request.max = nil
-
     -- Actually modify personal logistic slot
     local is_successful = playerdata.luaplayer.set_personal_logistic_slot(slot_index, new_slot)
-    playerdata.has_updates = true
-    register_update(player_index, game.tick)
 
-    -- Delete one-time logistic request reference if it wasn't successfully set
-    if not is_successful then playerdata.logistic_requests[request.name] = nil end
+    if is_successful then
+        -- Save details of change in playerdata so that it can be reverted later
+        playerdata.logistic_requests[request.name] = {
+            slot_index=slot_index,
+            old_min=existing_request.min,
+            old_max=existing_request.max,
+            new_min=request.count,
+            is_new=true
+        }
+
+        -- Update request's `logistic_request` table
+        request.logistic_request.slot_index = slot_index
+        request.logistic_request.min = request.count
+        request.logistic_request.max = nil
+
+        playerdata.has_updates = true
+        register_update(player_index, game.tick)
+    end
 end
 
 ---Restores the prior logistic request (if any) that was in place before the one-time request was
