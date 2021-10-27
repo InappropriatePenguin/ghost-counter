@@ -273,33 +273,36 @@ end
 ---Event handler for GUI button clicks
 ---@param event table Event table
 function Gui.on_gui_click(event)
-    -- Close button
-    if event.element.name == NAME.gui.close_button then
-        Gui.toggle(event.player_index, false)
+    local player_index = event.player_index
+    local element = event.element
+
+    if element.name == NAME.gui.close_button then
+        -- Close button
+        Gui.toggle(player_index, false)
+    elseif element.tags and element.tags.ghost_counter_request then
         -- One-time logistic request button
-    elseif event.element.tags and event.element.tags.ghost_counter_request then
-        local playerdata = get_make_playerdata(event.player_index)
-        local request_name = event.element.tags.ghost_counter_request
+        local playerdata = get_make_playerdata(player_index)
+        local request_name = element.tags.ghost_counter_request
         if not playerdata.logistic_requests[request_name] then
-            make_one_time_logistic_request(event.player_index, request_name)
-            Gui.update_list(event.player_index)
+            make_one_time_logistic_request(player_index, request_name)
+            Gui.update_list(player_index)
         else
-            restore_prior_logistic_request(event.player_index, request_name)
-            Gui.update_list(event.player_index)
+            restore_prior_logistic_request(player_index, request_name)
+            Gui.update_list(player_index)
         end
-    elseif event.element.name == NAME.gui.hide_empty_button then
-        local playerdata = get_make_playerdata(event.player_index)
+    elseif element.name == NAME.gui.hide_empty_button then
+        local playerdata = get_make_playerdata(player_index)
         local new_state = not playerdata.options.hide_empty_requests
         playerdata.options.hide_empty_requests = new_state
 
-        event.element.style = new_state and NAME.style.titlebar_button_active or
+        element.style = new_state and NAME.style.titlebar_button_active or
                                   NAME.style.titlebar_button
-        event.element.sprite = new_state and NAME.sprite.hide_empty_black or
+        element.sprite = new_state and NAME.sprite.hide_empty_black or
                                    NAME.sprite.hide_empty_white
-        event.element.clicked_sprite = new_state and NAME.sprite.hide_empty_white or
+        element.clicked_sprite = new_state and NAME.sprite.hide_empty_white or
                                            NAME.sprite.hide_empty_black
 
-        Gui.update_list(event.player_index)
+        Gui.update_list(player_index)
     end
 end
 script.on_event(defines.events.on_gui_click, Gui.on_gui_click)

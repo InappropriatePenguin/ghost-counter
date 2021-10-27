@@ -8,8 +8,9 @@ function on_player_selected_area(event, ignore_tiles)
 
     -- Open window only if there are non-zero ghost entities
     if table_size(requests) > 0 then
-        local playerdata = get_make_playerdata(event.player_index)
-        if playerdata.is_active then Gui.toggle(event.player_index, false) end
+        local player_index = event.player_index
+        local playerdata = get_make_playerdata(player_index)
+        if playerdata.is_active then Gui.toggle(player_index, false) end
 
         playerdata.job = {
             area=event.area,
@@ -17,10 +18,10 @@ function on_player_selected_area(event, ignore_tiles)
             requests=requests,
             requests_sorted=sort_requests(requests)
         }
-        update_inventory_info(event.player_index)
-        update_logistics_info(event.player_index)
+        update_inventory_info(player_index)
+        update_logistics_info(player_index)
 
-        Gui.toggle(event.player_index, true)
+        Gui.toggle(player_index, true)
 
         playerdata.luaplayer.clear_cursor()
     end

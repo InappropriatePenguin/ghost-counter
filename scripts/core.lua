@@ -147,8 +147,7 @@ function update_logistics_info(player_index)
 
     -- Iterate over each logistic slot and update request table with logistic request details
     local logistic_requests = {}
-    local slot_count = character.request_slot_count
-    for i = 1, slot_count do
+    for i = 1, character.request_slot_count do
         local slot = playerdata.luaplayer.get_personal_logistic_slot(i)
         if requests[slot.name] then
             requests[slot.name].logistic_request = {slot_index=i, min=slot.min, max=slot.max}
