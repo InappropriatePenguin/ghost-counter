@@ -60,40 +60,49 @@ function get_required_counts(entities, ignore_tiles)
     local cache = {}
 
     -- Iterate over entities and filter out anything that's not a ghost
+    local insert = table.insert
     for _, entity in pairs(entities) do
-        if entity.type == "entity-ghost" then
+        local entity_type = entity.type
+        if entity_type == "entity-ghost" then
+            local ghost_name = entity.ghost_name
+            local unit_number = entity.unit_number
+
             -- Get item to place entity, from prototype if necessary
-            if not cache[entity.ghost_name] then
-                local prototype = game.entity_prototypes[entity.ghost_name]
-                cache[entity.ghost_name] = {
+            if not cache[ghost_name] then
+                local prototype = game.entity_prototypes[ghost_name]
+                cache[ghost_name] = {
                     item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
                 }
             end
 
-            ghosts[entity.unit_number] = {}
+            ghosts[unit_number] = {}
 
             -- If entity is associated with item, increment request for that item by `item.count`
-            local item = cache[entity.ghost_name].item
+            local item = cache[ghost_name].item
             if item then
                 requests[item.name] = requests[item.name] or make_empty_request(item.name, "item")
                 requests[item.name].count = requests[item.name].count + item.count
-                table.insert(ghosts[entity.unit_number], item)
+                insert(ghosts[unit_number], item)
             end
 
             -- If entity has module requests, increment request for each module type
-            if entity.item_requests and table_size(entity.item_requests) > 0 then
-                for name, val in pairs(entity.item_requests) do
+            local item_requests = entity.item_requests
+            if item_requests and table_size(item_requests) > 0 then
+                for name, val in pairs(item_requests) do
                     requests[name] = requests[name] or make_empty_request(name, "item")
                     requests[name].count = requests[name].count + val
-                    table.insert(ghosts[entity.unit_number], {name=name, count=val})
+                    insert(ghosts[unit_number], {name=name, count=val})
                 end
             end
+
             script.register_on_entity_destroyed(entity)
-        elseif entity.type == "tile-ghost" and not ignore_tiles then
-            requests[entity.ghost_name] = requests[entity.ghost_name] or
-                                              make_empty_request(entity.ghost_name, "tile")
-            requests[entity.ghost_name].count = requests[entity.ghost_name].count + 1
-            ghosts[entity.unit_number] = {{name=entity.ghost_name, count=1}}
+        elseif entity_type == "tile-ghost" and not ignore_tiles then
+            local ghost_name = entity.ghost_name
+
+            requests[ghost_name] = requests[ghost_name] or make_empty_request(ghost_name, "tile")
+            requests[ghost_name].count = requests[ghost_name].count + 1
+            ghosts[entity.unit_number] = {{name=ghost_name, count=1}}
+
             script.register_on_entity_destroyed(entity)
         end
     end
