@@ -31,14 +31,21 @@ data:extend{
             flags={"gui-icon"}
         },
         item_to_spawn=NAME.tool.ghost_counter,
-        associated_control_input=NAME.input.ghost_counter,
+        associated_control_input=NAME.input.ghost_counter_selection,
         style="blue"
     }, {
         type="custom-input",
-        name=NAME.input.ghost_counter,
+        name=NAME.input.ghost_counter_selection,
         key_sequence="ALT + G",
+        order="a",
         action="spawn-item",
         item_to_spawn=NAME.tool.ghost_counter
+    }, {
+        type="custom-input",
+        name=NAME.input.ghost_counter_blueprint,
+        key_sequence="CONTROL + G",
+        order="b",
+        action="lua"
     }, {
         type = "sprite",
         name = NAME.sprite.hide_empty_white,

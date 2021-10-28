@@ -55,7 +55,7 @@ end
 ---@param ignore_tiles boolean Determines whether ghost tiles are counted
 ---@return table ghosts table of actual ghost entities/tiles
 ---@return table requests table of requests, indexed by request name
-function get_required_counts(entities, ignore_tiles)
+function get_selection_counts(entities, ignore_tiles, is_blueprint)
     local ghosts, requests = {}, {}
     local cache = {}
 
@@ -108,6 +108,49 @@ function get_required_counts(entities, ignore_tiles)
     end
 
     return ghosts, requests
+end
+
+---Processes blueprint entities and tiles to generate request counts
+---@param entities table array of blueprint entities
+---@param tiles table array of blueprint tiles
+---@return table requests
+function get_blueprint_counts(entities, tiles)
+    local requests = {}
+    local entity_cache= {}
+
+    -- Iterate over blueprint entities
+    for _, entity in pairs(entities) do
+        if not entity_cache[entity.name] then
+            local prototype = game.entity_prototypes[entity.name]
+            entity_cache[entity.name] = {
+                item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
+            }
+        end
+
+        -- If entity is associated with item, increment request for that item by `item.count`
+        local item = entity_cache[entity.name].item
+        if item then
+            requests[item.name] = requests[item.name] or make_empty_request(item.name, "item")
+            requests[item.name].count = requests[item.name].count + item.count
+        end
+
+        -- If entity has module requests, increment request for each module type
+        local item_requests = entity.items
+        if item_requests and table_size(item_requests) > 0 then
+            for name, val in pairs(item_requests) do
+                requests[name] = requests[name] or make_empty_request(name, "item")
+                requests[name].count = requests[name].count + val
+            end
+        end
+    end
+
+    -- Iterate over blueprint tiles
+    for _, tile in pairs(tiles) do
+        requests[tile.name] = requests[tile.name] or make_empty_request(tile.name, "tile")
+        requests[tile.name].count = requests[tile.name].count + 1
+    end
+
+    return requests
 end
 
 ---Deletes requests with zero ghosts from the `job.requests` table

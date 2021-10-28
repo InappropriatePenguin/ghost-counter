@@ -8,7 +8,8 @@ NAME = {
         button = mod_prefix .. "shortcut"
     },
     input = {
-        ghost_counter = mod_prefix .. "hotkey"
+        ghost_counter_selection = mod_prefix .. "selection-hotkey",
+        ghost_counter_blueprint = mod_prefix .. "blueprint-hotkey"
     },
     setting = {
         min_update_interval = mod_prefix .. "min-update-interval"

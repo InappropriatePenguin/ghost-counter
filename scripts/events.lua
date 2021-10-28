@@ -4,7 +4,7 @@
 function on_player_selected_area(event, ignore_tiles)
     if not event.item == NAME.tool.ghost_counter then return end
 
-    local ghosts, requests = get_required_counts(event.entities, ignore_tiles)
+    local ghosts, requests = get_selection_counts(event.entities, ignore_tiles)
 
     -- Open window only if there are non-zero ghost entities
     if table_size(requests) > 0 then
@@ -30,6 +30,38 @@ script.on_event(defines.events.on_player_selected_area,
     function(event) on_player_selected_area(event, true) end)
 script.on_event(defines.events.on_player_alt_selected_area,
     function(event) on_player_selected_area(event, false) end)
+
+---Handles the player using the blueprint hotkey
+---@param event table Event table for custom input
+function on_player_selected_blueprint(event)
+    local player_index = event.player_index
+    local playerdata = get_make_playerdata(player_index)
+    local entities = playerdata.luaplayer.get_blueprint_entities() or {}
+
+    local tiles = {}
+    if (playerdata.luaplayer.is_cursor_blueprint() and
+        playerdata.luaplayer.cursor_stack.valid_for_read) then
+        tiles = playerdata.luaplayer.cursor_stack.get_blueprint_tiles() or {}
+    end
+
+    -- Abort if player not holding blueprint or empty blueprint
+    if not (entities and #entities > 0) and not (tiles and #tiles > 0) then return end
+
+    local requests = get_blueprint_counts(entities, tiles)
+
+    playerdata.job = {
+        area={},
+        ghosts={},
+        requests=requests,
+        requests_sorted=sort_requests(requests)
+    }
+
+    update_inventory_info(player_index)
+    update_logistics_info(player_index)
+
+    Gui.toggle(player_index, true)
+end
+script.on_event(NAME.input.ghost_counter_blueprint, on_player_selected_blueprint)
 
 ---Updates playerdata.job.requests table as well as one-time requests to see if any can be
 ---considered fulfilled
