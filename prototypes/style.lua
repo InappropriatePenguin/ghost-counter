@@ -1,14 +1,8 @@
 local guistyle = data.raw["gui-style"]["default"]
 
-guistyle[NAME.style.root_frame] = {
-    type="frame_style",
-    width=422
-}
+guistyle[NAME.style.root_frame] = {type="frame_style", width=422}
 
-guistyle[NAME.style.titlebar_flow] = {
-    type="horizontal_flow_style",
-    horizontal_spacing=8
-}
+guistyle[NAME.style.titlebar_flow] = {type="horizontal_flow_style", horizontal_spacing=8}
 
 guistyle[NAME.style.titlebar_space_header] = {
     type="empty_widget_style",
@@ -19,23 +13,48 @@ guistyle[NAME.style.titlebar_space_header] = {
     right_margin=4
 }
 
-guistyle[NAME.style.titlebar_button] = {
-    type="button_style",
-    parent="frame_action_button"
-}
+guistyle[NAME.style.titlebar_button] = {type="button_style", parent="frame_action_button"}
 
 guistyle[NAME.style.titlebar_button_active] = {
     type="button_style",
     parent="frame_action_button",
-    default_graphical_set = guistyle["frame_button"].clicked_graphical_set,
-    clicked_graphical_set = guistyle["frame_button"].default_graphical_set
+    default_graphical_set=guistyle["frame_button"].clicked_graphical_set,
+    clicked_graphical_set=guistyle["frame_button"].default_graphical_set
 }
 
 guistyle[NAME.style.inside_deep_frame] = {
     type="frame_style",
     parent="inside_deep_frame",
     horizontally_stretchable="stretch_and_expand",
-    vertically_stretchable="stretch_and_expand"
+    vertically_stretchable="stretch_and_expand",
+    vertical_flow_style={type="vertical_flow_style", vertical_spacing=0}
+}
+
+guistyle[NAME.style.topbar_frame] = {
+    type="frame_style",
+    parent="subheader_frame",
+    top_padding=6,
+    bottom_padding=0,
+    left_padding=4,
+    right_padding=6,
+    height=40,
+    horizontally_stretchable="stretch_and_expand",
+    horizontal_flow_style={type="horizontal_flow_style", height=28, vertical_align="center", horizontal_align="right"}
+}
+
+guistyle[NAME.style.ghost_request_all_button] = {
+    type="button_style",
+    parent=NAME.style.ghost_request_button,
+    width=100,
+    height=28
+}
+
+guistyle[NAME.style.ghost_cancel_all_button] = {
+    type="button_style",
+    parent="slot_sized_button_red", --tool_button_red",
+    padding=3,
+    height=28,
+    width=28
 }
 
 guistyle[NAME.style.scroll_pane] = {
@@ -102,7 +121,4 @@ guistyle[NAME.style.ghost_request_fulfilled_flow] = {
     vertical_align="center"
 }
 
-guistyle[NAME.style.ghost_request_fulfilled_sprite] = {
-    type="image_style",
-    size={20, 20}
-}
+guistyle[NAME.style.ghost_request_fulfilled_sprite] = {type="image_style", size={20, 20}}

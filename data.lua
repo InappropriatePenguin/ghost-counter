@@ -10,8 +10,8 @@ data:extend{
         alt_selection_color={0, 89, 132},
         selection_mode={"any-entity", "same-force"},
         alt_selection_mode={"any-entity", "same-force"},
-        selection_count_button_color = {43, 113, 180},
-        alt_selection_count_button_color = {43, 113, 180},
+        selection_count_button_color={43, 113, 180},
+        alt_selection_count_button_color={43, 113, 180},
         selection_cursor_box_type="copy",
         alt_selection_cursor_box_type="copy",
         stack_size=1,
@@ -56,13 +56,31 @@ data:extend{
         flags = {"gui-icon"},
         scale = 0.5
     }, {
-        type = "sprite",
-        name = NAME.sprite.hide_empty_black,
-        filename = "__ghost-counter__/graphics/hide_black.png",
-        priority = "medium",
-        width = 32,
-        height = 32,
-        flags = {"gui-icon"},
-        scale = 0.5
+        type="sprite",
+        name=NAME.sprite.hide_empty_black,
+        filename="__ghost-counter__/graphics/hide_black.png",
+        priority="medium",
+        width=32,
+        height=32,
+        flags={"gui-icon"},
+        scale=0.5
+    }, {
+        type="sprite",
+        name=NAME.sprite.cancel_white,
+        filename="__ghost-counter__/graphics/cancel_white.png",
+        priority="medium",
+        width=32,
+        height=32,
+        flags={"gui-icon"},
+        scale=0.5
+    }, {
+        type="sprite",
+        name=NAME.sprite.cancel_black,
+        filename="__ghost-counter__/graphics/cancel_black.png",
+        priority="medium",
+        width=32,
+        height=32,
+        flags={"gui-icon"},
+        scale=0.5
     }
 }

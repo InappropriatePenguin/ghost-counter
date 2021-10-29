@@ -55,7 +55,7 @@ end
 ---@param ignore_tiles boolean Determines whether ghost tiles are counted
 ---@return table ghosts table of actual ghost entities/tiles
 ---@return table requests table of requests, indexed by request name
-function get_selection_counts(entities, ignore_tiles, is_blueprint)
+function get_selection_counts(entities, ignore_tiles)
     local ghosts, requests = {}, {}
     local cache = {}
 
@@ -116,7 +116,7 @@ end
 ---@return table requests
 function get_blueprint_counts(entities, tiles)
     local requests = {}
-    local entity_cache= {}
+    local entity_cache = {}
 
     -- Iterate over blueprint entities
     for _, entity in pairs(entities) do
@@ -216,24 +216,20 @@ function update_one_time_logistic_requests(player_index)
         local request = playerdata.job.requests[name]
         local slot = playerdata.luaplayer.get_personal_logistic_slot(logi_req.slot_index)
 
-        -- If no matching request exists, restore prior logistic request
-        if not request then
-            restore_prior_logistic_request(player_index, name)
-            return
-        end
+        if request then
+            -- Update logistic request to reflect new ghost count
+            if slot.min ~= request.count then
+                local new_slot = {name=name, min=request.count}
+                logi_req.new_min = request.count
+                logi_req.is_new = true
+                playerdata.luaplayer.set_personal_logistic_slot(logi_req.slot_index, new_slot)
+            end
 
-        -- Update logistic request to reflect new ghost count
-        if slot.min > request.count then
-            local new_slot = {name=name, min=request.count}
-            logi_req.new_min = request.count
-            logi_req.is_new = true
-            playerdata.luaplayer.set_personal_logistic_slot(logi_req.slot_index, new_slot)
-        end
-
-        -- Restore prior request (if any) if one-time request has been fulfilled
-        if (inventory.get_item_count(name) >= logi_req.new_min) or
-            (logi_req.new_min <= (logi_req.old_min or 0)) then
-            restore_prior_logistic_request(player_index, name)
+            -- Restore prior request (if any) if one-time request has been fulfilled
+            if (inventory.get_item_count(name) >= logi_req.new_min) or
+                (logi_req.new_min <= (logi_req.old_min or 0)) then
+                restore_prior_logistic_request(player_index, name)
+            end
         end
     end
 end
@@ -284,28 +280,27 @@ function make_one_time_logistic_request(player_index, name)
 
     -- Get any existing request and abort if it would already meet need
     local existing_request = get_existing_logistic_request(player_index, request.name) or {}
-    if (existing_request.min or 0) > request.count then
-        register_update(player_index, game.tick)
-        return
-    end
+    if (existing_request.min or 0) >= request.count then return end
 
     -- Prepare new logistic slot and get existing or first empty `slot_index`
     local new_slot = {name=request.name, min=request.count}
     local slot_index = existing_request.slot_index or get_first_empty_slot(player_index)
 
+    -- Save details of change in playerdata so that it can be reverted later
+    -- This is set here in order for the event handler to be able to identify this change
+    -- as originating from the mod and to ignore it.
+    playerdata.logistic_requests[request.name] = {
+        slot_index=slot_index,
+        old_min=existing_request.min,
+        old_max=existing_request.max,
+        new_min=request.count,
+        is_new=true
+    }
+
     -- Actually modify personal logistic slot
     local is_successful = playerdata.luaplayer.set_personal_logistic_slot(slot_index, new_slot)
 
     if is_successful then
-        -- Save details of change in playerdata so that it can be reverted later
-        playerdata.logistic_requests[request.name] = {
-            slot_index=slot_index,
-            old_min=existing_request.min,
-            old_max=existing_request.max,
-            new_min=request.count,
-            is_new=true
-        }
-
         -- Update request's `logistic_request` table
         request.logistic_request.slot_index = slot_index
         request.logistic_request.min = request.count
@@ -313,6 +308,9 @@ function make_one_time_logistic_request(player_index, name)
 
         playerdata.has_updates = true
         register_update(player_index, game.tick)
+    else
+        -- Delete record of temporary request as it didn't go through
+        playerdata.logistic_requests[request.name] = nil
     end
 end
 
@@ -346,9 +344,15 @@ function restore_prior_logistic_request(player_index, name)
             playerdata.job.requests[name].logistic_request = {}
         end
     end
+end
 
-    -- Delete one-time request from playerdata table
-    playerdata.logistic_requests[name] = nil
+---Iterates over `playerdata.logistic_requests` to get rid of them
+---@param player_index number Player index
+function cancel_all_one_time_requests(player_index)
+    local playerdata = get_make_playerdata(player_index)
+    for name, _ in pairs(playerdata.logistic_requests) do
+        restore_prior_logistic_request(player_index, name)
+    end
 end
 
 ---Registers that a change in data tables has occured and marks the responsible player as having

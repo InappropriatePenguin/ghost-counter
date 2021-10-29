@@ -35,9 +35,14 @@ end
 function Gui.make_gui(player_index)
     local playerdata = get_make_playerdata(player_index)
     local screen = playerdata.luaplayer.gui.screen
+    local window_loc_x, window_loc_y
 
     -- Destory existing mod GUI if one exists
-    if screen[NAME.gui.root_frame] then screen[NAME.gui.root_frame].destroy() end
+    if screen[NAME.gui.root_frame] then
+        local location = screen[NAME.gui.root_frame].location
+        window_loc_x, window_loc_y = location.x, location.y
+        screen[NAME.gui.root_frame].destroy()
+    end
 
     playerdata.gui.root = screen.add{
         type="frame",
@@ -48,8 +53,8 @@ function Gui.make_gui(player_index)
 
     do
         local resolution = playerdata.luaplayer.display_resolution
-        local x = 50
-        local y = (resolution.height / 2) - 300
+        local x = window_loc_x or 50
+        local y = window_loc_y or (resolution.height / 2) - 300
         playerdata.gui.root.location = {x, y}
     end
 
@@ -91,7 +96,32 @@ function Gui.make_gui(player_index)
         style="close_button"
     }
 
-    local deep_frame = playerdata.gui.root.add{type="frame", style=NAME.style.inside_deep_frame}
+    local deep_frame = playerdata.gui.root.add{
+        type="frame",
+        direction="vertical",
+        style=NAME.style.inside_deep_frame
+    }
+
+    local toolbar = deep_frame.add{
+        type="frame",
+        direction="horizontal",
+        style=NAME.style.topbar_frame
+    }
+    toolbar.add{
+        type="button",
+        name=NAME.gui.request_all_button,
+        caption="Request all",
+        style=NAME.style.ghost_request_all_button
+    }
+    toolbar.add{
+        type="sprite-button",
+        name=NAME.gui.cancel_all_button,
+        sprite=NAME.sprite.cancel_white,
+        hovered_sprite=NAME.sprite.cancel_black,
+        clicked_sprite=NAME.sprite.cancel_black,
+        style=NAME.style.ghost_cancel_all_button
+    }
+
     playerdata.gui.requests_container = deep_frame.add{
         type="scroll-pane",
         name=NAME.gui.scroll_pane,
@@ -296,11 +326,23 @@ function Gui.on_gui_click(event)
         playerdata.options.hide_empty_requests = new_state
 
         element.style = new_state and NAME.style.titlebar_button_active or
-                                  NAME.style.titlebar_button
-        element.sprite = new_state and NAME.sprite.hide_empty_black or
-                                   NAME.sprite.hide_empty_white
+                            NAME.style.titlebar_button
+        element.sprite = new_state and NAME.sprite.hide_empty_black or NAME.sprite.hide_empty_white
         element.clicked_sprite = new_state and NAME.sprite.hide_empty_white or
-                                           NAME.sprite.hide_empty_black
+                                     NAME.sprite.hide_empty_black
+
+        Gui.update_list(player_index)
+    elseif element.name == NAME.gui.request_all_button then
+        local playerdata = get_make_playerdata(player_index)
+        for _, request in pairs(playerdata.job.requests) do
+            if request.count > 0 and not playerdata.logistic_requests[request.name] then
+                make_one_time_logistic_request(player_index, request.name)
+            end
+        end
+
+        Gui.update_list(player_index)
+    elseif element.name == NAME.gui.cancel_all_button then
+        cancel_all_one_time_requests(player_index)
 
         Gui.update_list(player_index)
     end

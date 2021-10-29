@@ -10,7 +10,6 @@ function on_player_selected_area(event, ignore_tiles)
     if table_size(requests) > 0 then
         local player_index = event.player_index
         local playerdata = get_make_playerdata(player_index)
-        if playerdata.is_active then Gui.toggle(player_index, false) end
 
         playerdata.job = {
             area=event.area,
