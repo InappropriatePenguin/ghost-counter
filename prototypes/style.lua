@@ -53,8 +53,8 @@ guistyle[NAME.style.ghost_cancel_all_button] = {
     type="button_style",
     parent="slot_sized_button_red", --tool_button_red",
     padding=3,
-    height=28,
-    width=28
+    height=30,
+    width=30
 }
 
 guistyle[NAME.style.scroll_pane] = {
