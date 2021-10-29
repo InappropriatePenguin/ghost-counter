@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 2021-10-29
+  Features:
+    - Added a "Request all" button, which allows you to set temporary logistic requests for all the items that you're missing to complete your build. The red button next to it will cancel all of your temporary logistic requests and restore any previous ones you had for those items.
+  Bugfixes:
+    - Fixed issue that could cause temporary logistic requests to linger if an inventory change or ghost count change affected a large number of them.
+    - Fixed issue with new ghost area selections inconsistently modifying temporary logistic requests that you had set.
+    - Fixed mod GUI moving to its default position if you made a new ghost area selection while it was open.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2021-10-28
   Features:
