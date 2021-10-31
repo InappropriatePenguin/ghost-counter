@@ -108,6 +108,19 @@ function Gui.make_gui(player_index)
         style=NAME.style.topbar_frame
     }
     toolbar.add{
+        type="sprite-button",
+        name=NAME.gui.get_signals_button,
+        sprite=NAME.sprite.get_signals_white,
+        hovered_sprite=NAME.sprite.get_signals_black,
+        clicked_sprite=NAME.sprite.get_signals_black,
+        tooltip={"ghost-counter-gui.get-signals-tooltip"},
+        style=NAME.style.get_signals_button
+    }
+    toolbar.add{
+        type="empty-widget",
+        style=NAME.style.topbar_space
+    }
+    toolbar.add{
         type="button",
         name=NAME.gui.request_all_button,
         caption={"ghost-counter-gui.request-all-caption"},
@@ -334,6 +347,8 @@ function Gui.on_gui_click(event)
                                      NAME.sprite.hide_empty_black
 
         Gui.update_list(player_index)
+    elseif element.name == NAME.gui.get_signals_button then
+        make_combinators_blueprint(event.player_index)
     elseif element.name == NAME.gui.request_all_button then
         local playerdata = get_make_playerdata(player_index)
         for _, request in pairs(playerdata.job.requests) do

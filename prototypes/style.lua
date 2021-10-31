@@ -35,17 +35,33 @@ guistyle[NAME.style.topbar_frame] = {
     parent="subheader_frame",
     top_padding=6,
     bottom_padding=0,
-    left_padding=4,
+    left_padding=6,
     right_padding=6,
     height=40,
     horizontally_stretchable="stretch_and_expand",
-    horizontal_flow_style={type="horizontal_flow_style", height=28, vertical_align="center", horizontal_align="right"}
+    horizontal_flow_style={type="horizontal_flow_style", height=28, vertical_align="center", horizontal_align="left"}
+}
+
+guistyle[NAME.style.get_signals_button] = {
+    type="button_style",
+    parent=NAME.style.ghost_request_button,
+    padding=2,
+    width=28,
+    height=28
+}
+
+guistyle[NAME.style.topbar_space] = {
+    type="empty_widget_style",
+    height=24,
+    horizontally_stretchable="on",
+    left_margin=4,
+    right_margin=4
 }
 
 guistyle[NAME.style.ghost_request_all_button] = {
     type="button_style",
     parent=NAME.style.ghost_request_button,
-    width=100,
+    minimal_width=100,
     height=28
 }
 

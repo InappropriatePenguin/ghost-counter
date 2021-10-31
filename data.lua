@@ -48,6 +48,24 @@ data:extend{
         action="lua"
     }, {
         type = "sprite",
+        name = NAME.sprite.get_signals_white,
+        filename = "__ghost-counter__/graphics/get-signals-white.png",
+        priority = "medium",
+        width = 32,
+        height = 32,
+        flags = {"gui-icon"},
+        scale = 0.5
+    }, {
+        type = "sprite",
+        name = NAME.sprite.get_signals_black,
+        filename = "__ghost-counter__/graphics/get-signals-black.png",
+        priority = "medium",
+        width = 32,
+        height = 32,
+        flags = {"gui-icon"},
+        scale = 0.5
+    }, {
+        type = "sprite",
         name = NAME.sprite.hide_empty_white,
         filename = "__ghost-counter__/graphics/hide-white.png",
         priority = "medium",
