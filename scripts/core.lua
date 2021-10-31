@@ -96,6 +96,15 @@ function get_selection_counts(entities, ignore_tiles)
             end
 
             script.register_on_entity_destroyed(entity)
+        elseif entity_type == "item-request-proxy" then
+            local unit_number = entity.unit_number
+            ghosts[unit_number] = {}
+            for name, val in pairs(entity.item_requests) do
+                requests[name] = requests[name] or make_empty_request(name, "item")
+                requests[name].count = requests[name].count + val
+                insert(ghosts[unit_number], {name=name, count=val})
+            end
+            script.register_on_entity_destroyed(entity)
         elseif entity_type == "tile-ghost" and not ignore_tiles then
             local ghost_name = entity.ghost_name
 
