@@ -135,11 +135,14 @@ function on_nth_tick(event)
     for player_index, playerdata in pairs(global.playerdata) do
         -- If a player had registered data updates, reprocess their data
         if playerdata.has_updates then
-            update_inventory_info(player_index)
             update_one_time_logistic_requests(player_index)
-            update_logistics_info(player_index)
 
-            Gui.update_list(player_index)
+            if playerdata.is_active then
+                update_inventory_info(player_index)
+                update_logistics_info(player_index)
+
+                Gui.update_list(player_index)
+            end
 
             -- Reset `has_updates` boolean for that player
             playerdata.has_updates = false

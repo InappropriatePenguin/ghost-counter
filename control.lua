@@ -43,6 +43,19 @@ function on_load()
 end
 script.on_load(on_load)
 
+---Validate mod data
+function on_configuration_changed()
+    -- Validate `playerdata.job` table and contents
+    for _, playerdata in pairs(global.playerdata) do
+        playerdata.job = playerdata.job or {}
+        playerdata.job.area = playerdata.job.area or {}
+        playerdata.job.ghosts = playerdata.job.ghosts or {}
+        playerdata.job.requests = playerdata.job.requests or {}
+        playerdata.job.requests_sorted = playerdata.job.requests_sorted or {}
+    end
+end
+script.on_configuration_changed(on_configuration_changed)
+
 ---Re-registers event handlers if appropriate for joining player
 ---@param event table Event table
 function on_player_joined_game(event)

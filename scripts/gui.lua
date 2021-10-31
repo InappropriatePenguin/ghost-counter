@@ -16,8 +16,12 @@ function Gui.toggle(player_index, state)
         register_logistics_monitoring(true)
     else
         playerdata.is_active = false
-        playerdata.job = nil
-
+        playerdata.job = {
+            area={},
+            ghosts={},
+            requests={},
+            requests_sorted={}
+        }
         -- Destroy mod GUI and remove references to it
         if playerdata.gui.root and playerdata.gui.root.valid then
             playerdata.gui.root.destroy()
@@ -164,6 +168,7 @@ end
 ---@param player_index number Player index
 function Gui.update_list(player_index)
     local playerdata = get_make_playerdata(player_index)
+    if not playerdata.is_active or not playerdata.gui.requests then return end
 
     local indices = {count=1, sprite=2, label=3, inventory=4, request=5}
 
