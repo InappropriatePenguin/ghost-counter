@@ -5,6 +5,8 @@ NAME = {
     shortcut={button=mod_prefix .. "shortcut"},
     setting={min_update_interval=mod_prefix .. "min-update-interval"},
     sprite={
+        get_signals_white=mod_prefix .. "get-signals-white",
+        get_signals_black=mod_prefix .. "get-signals-black",
         hide_empty_white=mod_prefix .. "hide-empty-white",
         hide_empty_black=mod_prefix .. "hide-empty-black",
         cancel_white=mod_prefix .. "cancel-white",
@@ -14,6 +16,7 @@ NAME = {
         root_frame=mod_prefix .. "root-frame",
         hide_empty_button=mod_prefix .. "hide-empty-requests-button",
         close_button=mod_prefix .. "close-button",
+        get_signals_button = mod_prefix .. "convert-to-signals-button",
         request_all_button=mod_prefix .. "request-all-button",
         cancel_all_button=mod_prefix .. "cancel-all-button",
         scroll_pane=mod_prefix .. "scroll-pane"
@@ -30,6 +33,8 @@ NAME = {
         titlebar_button_active = mod_prefix .. "titlebar-button-active",
         inside_deep_frame = mod_prefix .. "inside-deep-frame",
         topbar_frame=mod_prefix .. "topbar-frame",
+        get_signals_button=mod_prefix .. "get-signals-button",
+        topbar_space=mod_prefix .. "topbar-space",
         ghost_request_all_button=mod_prefix .. "ghost-request-all-button",
         ghost_cancel_all_button=mod_prefix .. "ghost-cancell-all-button",
         scroll_pane = mod_prefix .. "scroll-pane",

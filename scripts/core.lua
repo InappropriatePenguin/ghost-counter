@@ -153,6 +153,68 @@ function get_blueprint_counts(entities, tiles)
     return requests
 end
 
+---Converts `job.requests` to signals out of a series of constant combinators
+---@param player_index number Player index
+function make_combinators_blueprint(player_index)
+    local playerdata = get_make_playerdata(player_index)
+
+    -- Make sure constant combinator prototype exists
+    local prototype = game.entity_prototypes["constant-combinator"]
+    if not prototype then
+        playerdata.luaplayer.print({"ghost-counter-message.missing-constant-combinator-prototype"})
+        return
+    end
+
+    local n_slots = prototype.item_slot_count
+    local requests = playerdata.job.requests_sorted
+    local request_index = 1
+    local combinators = {}
+
+    -- Iterate over the number of constant combinators we will need
+    for i = 1, math.ceil(#requests/n_slots) do
+        combinators[i] = {
+            entity_number=i,
+            name="constant-combinator",
+            position={i-0.5, 0},
+            direction=4,
+            control_behavior={filters={}},
+            connections={{}}
+        }
+
+        local filters = combinators[i].control_behavior.filters
+
+        -- Set the combinator slots to the ghost request counts
+        for j = 1, n_slots do
+            local request = requests[request_index]
+            filters[j] = {signal={type="item", name=request.name}, count=request.count, index=j}
+
+            -- Increment request index; break if no more requests are left
+            request_index = request_index + 1
+            if request_index > #requests then break end
+        end
+    end
+
+    -- Wire up the combinators to one another
+    if #combinators > 1 then
+        for i = 1, (#combinators - 1) do
+            local connections = combinators[i].connections[1]
+
+            connections["green"] = {{entity_id=i+1}}
+            connections["red"] = {{entity_id=i+1}}
+        end
+    end
+
+    -- Try to clear the cursor
+    local is_successful = playerdata.luaplayer.clear_cursor()
+
+    if is_successful then
+        playerdata.luaplayer.cursor_stack.set_stack("blueprint")
+        playerdata.luaplayer.cursor_stack.set_blueprint_entities(combinators)
+    else
+        playerdata.luaplayer.print({"ghost-counter-message.failed-to-clear-cursor"})
+    end
+end
+
 ---Deletes requests with zero ghosts from the `job.requests` table
 ---@param player_index number Player index
 function remove_empty_requests(player_index)
@@ -166,15 +228,18 @@ end
 ---@param player_index number Player index
 function update_inventory_info(player_index)
     local playerdata = get_make_playerdata(player_index)
-    local inventory = playerdata.luaplayer.get_main_inventory()
     local cursor_stack = playerdata.luaplayer.cursor_stack
+    local inventory = playerdata.luaplayer.get_main_inventory()
+    local contents = inventory.get_contents()
+    local requests = playerdata.job.requests
 
-    -- Iterate over each request and get the count in inventory and cursor stack
-    for name, request in pairs(playerdata.job.requests) do
-        request.inventory = inventory.get_item_count(name)
-        if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == name then
-            request.inventory = request.inventory + cursor_stack.count
-        end
+    -- Iterate over each request and get the count in inventory
+    for name, request in pairs(requests) do request.inventory = contents[name] or 0 end
+
+    -- Add cursor contents to request count
+    if cursor_stack and cursor_stack.valid_for_read and requests[cursor_stack.name] then
+        local request = requests[cursor_stack.name]
+        request.inventory = request.inventory + cursor_stack.count
     end
 end
 

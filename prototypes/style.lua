@@ -35,26 +35,42 @@ guistyle[NAME.style.topbar_frame] = {
     parent="subheader_frame",
     top_padding=6,
     bottom_padding=0,
-    left_padding=4,
+    left_padding=6,
     right_padding=6,
     height=40,
     horizontally_stretchable="stretch_and_expand",
-    horizontal_flow_style={type="horizontal_flow_style", height=28, vertical_align="center", horizontal_align="right"}
+    horizontal_flow_style={type="horizontal_flow_style", height=28, vertical_align="center", horizontal_align="left"}
+}
+
+guistyle[NAME.style.get_signals_button] = {
+    type="button_style",
+    parent=NAME.style.ghost_request_button,
+    padding=2,
+    width=28,
+    height=28
+}
+
+guistyle[NAME.style.topbar_space] = {
+    type="empty_widget_style",
+    height=24,
+    horizontally_stretchable="on",
+    left_margin=4,
+    right_margin=4
 }
 
 guistyle[NAME.style.ghost_request_all_button] = {
     type="button_style",
     parent=NAME.style.ghost_request_button,
-    width=100,
+    minimal_width=100,
     height=28
 }
 
 guistyle[NAME.style.ghost_cancel_all_button] = {
     type="button_style",
-    parent="slot_sized_button_red", --tool_button_red",
-    padding=3,
-    height=30,
-    width=30
+    parent="slot_sized_button_red",
+    padding=2,
+    height=28,
+    width=28
 }
 
 guistyle[NAME.style.scroll_pane] = {
@@ -99,7 +115,7 @@ guistyle[NAME.style.inventory_number_label] = {
 
 guistyle[NAME.style.ghost_request_button] = {
     type="button_style",
-    parent="tool_button_blue",
+    parent="slot_sized_button_blue",
     size={50, 24},
     default_font_color={1, 1, 1},
     vertically_stretchable="stretch_and_expand"

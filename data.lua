@@ -48,8 +48,26 @@ data:extend{
         action="lua"
     }, {
         type = "sprite",
+        name = NAME.sprite.get_signals_white,
+        filename = "__ghost-counter__/graphics/get-signals-white.png",
+        priority = "medium",
+        width = 32,
+        height = 32,
+        flags = {"gui-icon"},
+        scale = 0.5
+    }, {
+        type = "sprite",
+        name = NAME.sprite.get_signals_black,
+        filename = "__ghost-counter__/graphics/get-signals-black.png",
+        priority = "medium",
+        width = 32,
+        height = 32,
+        flags = {"gui-icon"},
+        scale = 0.5
+    }, {
+        type = "sprite",
         name = NAME.sprite.hide_empty_white,
-        filename = "__ghost-counter__/graphics/hide_white.png",
+        filename = "__ghost-counter__/graphics/hide-white.png",
         priority = "medium",
         width = 32,
         height = 32,
@@ -58,7 +76,7 @@ data:extend{
     }, {
         type="sprite",
         name=NAME.sprite.hide_empty_black,
-        filename="__ghost-counter__/graphics/hide_black.png",
+        filename="__ghost-counter__/graphics/hide-black.png",
         priority="medium",
         width=32,
         height=32,
@@ -67,7 +85,7 @@ data:extend{
     }, {
         type="sprite",
         name=NAME.sprite.cancel_white,
-        filename="__ghost-counter__/graphics/cancel_white.png",
+        filename="__ghost-counter__/graphics/cancel-white.png",
         priority="medium",
         width=32,
         height=32,
@@ -76,7 +94,7 @@ data:extend{
     }, {
         type="sprite",
         name=NAME.sprite.cancel_black,
-        filename="__ghost-counter__/graphics/cancel_black.png",
+        filename="__ghost-counter__/graphics/cancel-black.png",
         priority="medium",
         width=32,
         height=32,
