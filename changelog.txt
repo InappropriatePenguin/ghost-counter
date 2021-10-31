@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2021-10-31
+  Bugfixes:
+    - Fixed crash in Space Exploration which could occur if you had the contents of your inventory or cursor change a few ticks before you turned on Navigation Satellite view.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2021-10-29
   Features:
