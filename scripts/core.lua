@@ -166,15 +166,20 @@ end
 ---@param player_index number Player index
 function update_inventory_info(player_index)
     local playerdata = get_make_playerdata(player_index)
-    local inventory = playerdata.luaplayer.get_main_inventory()
     local cursor_stack = playerdata.luaplayer.cursor_stack
+    local inventory = playerdata.luaplayer.get_main_inventory()
+    local contents = inventory.get_contents()
+    local requests = playerdata.job.requests
 
-    -- Iterate over each request and get the count in inventory and cursor stack
-    for name, request in pairs(playerdata.job.requests) do
-        request.inventory = inventory.get_item_count(name)
-        if cursor_stack and cursor_stack.valid_for_read and cursor_stack.name == name then
+    -- Iterate over each request and get the count in inventory
+    for name, request in pairs(requests) do
+        request.inventory = contents[name] or 0
+    end
+
+    -- Add cursor contents to request count
+    if cursor_stack and cursor_stack.valid_for_read and requests[cursor_stack.name] then
+        local request = requests[cursor_stack.name]
             request.inventory = request.inventory + cursor_stack.count
-        end
     end
 end
 
