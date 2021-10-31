@@ -17,6 +17,8 @@ function on_player_selected_area(event, ignore_tiles)
             requests=requests,
             requests_sorted=sort_requests(requests)
         }
+
+        update_one_time_logistic_requests(player_index)
         update_inventory_info(player_index)
         update_logistics_info(player_index)
 
@@ -55,6 +57,7 @@ function on_player_selected_blueprint(event)
         requests_sorted=sort_requests(requests)
     }
 
+    update_one_time_logistic_requests(player_index)
     update_inventory_info(player_index)
     update_logistics_info(player_index)
 
