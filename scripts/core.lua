@@ -208,8 +208,9 @@ end
 ---@param player_index number Player index
 function update_one_time_logistic_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
+    if not playerdata.luaplayer.character then return end
+
     local inventory = playerdata.luaplayer.get_main_inventory()
-    if not inventory then return end
 
     -- Iterate over one-time requests table and restore old requests if they have been fulfilled
     for name, logi_req in pairs(playerdata.logistic_requests) do
