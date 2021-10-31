@@ -67,10 +67,10 @@ guistyle[NAME.style.ghost_request_all_button] = {
 
 guistyle[NAME.style.ghost_cancel_all_button] = {
     type="button_style",
-    parent="slot_sized_button_red", --tool_button_red",
-    padding=3,
-    height=30,
-    width=30
+    parent="slot_sized_button_red",
+    padding=2,
+    height=28,
+    width=28
 }
 
 guistyle[NAME.style.scroll_pane] = {
@@ -115,7 +115,7 @@ guistyle[NAME.style.inventory_number_label] = {
 
 guistyle[NAME.style.ghost_request_button] = {
     type="button_style",
-    parent="tool_button_blue",
+    parent="slot_sized_button_blue",
     size={50, 24},
     default_font_color={1, 1, 1},
     vertically_stretchable="stretch_and_expand"
