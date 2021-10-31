@@ -81,7 +81,7 @@ function Gui.make_gui(player_index)
     titlebar_flow.add{
         type="sprite-button",
         name=NAME.gui.hide_empty_button,
-        tooltip={"gui.ghost-counter-hide-empty-requests"},
+        tooltip={"ghost-counter-gui.hide-empty-requests-tooltip"},
         sprite=hide_empty and NAME.sprite.hide_empty_black or NAME.sprite.hide_empty_white,
         hovered_sprite=NAME.sprite.hide_empty_black,
         clicked_sprite=hide_empty and NAME.sprite.hide_empty_white or NAME.sprite.hide_empty_black,
@@ -110,7 +110,8 @@ function Gui.make_gui(player_index)
     toolbar.add{
         type="button",
         name=NAME.gui.request_all_button,
-        caption="Request all",
+        caption={"ghost-counter-gui.request-all-caption"},
+        tooltip={"ghost-counter-gui.request-all-tooltip"},
         style=NAME.style.ghost_request_all_button
     }
     toolbar.add{
@@ -119,6 +120,7 @@ function Gui.make_gui(player_index)
         sprite=NAME.sprite.cancel_white,
         hovered_sprite=NAME.sprite.cancel_black,
         clicked_sprite=NAME.sprite.cancel_black,
+        tooltip={"ghost-counter-gui.cancel-all-tooltip"},
         style=NAME.style.ghost_cancel_all_button
     }
 
@@ -193,8 +195,8 @@ function Gui.update_list(player_index)
                     request_element.style = style
                     request_element.caption = diff
                     request_element.tooltip = enabled and
-                                                  {"gui.ghost-counter-set-temporary-request"} or
-                                                  {"gui.ghost-counter-existing-logistic-request"}
+                                                  {"ghost-counter-gui.set-temporary-request"} or
+                                                  {"ghost-counter-gui.existing-logistic-request"}
                 else
                     frame.children[indices.request].destroy()
                     frame.add{
@@ -202,8 +204,8 @@ function Gui.update_list(player_index)
                         caption=diff,
                         enabled=enabled,
                         style=style,
-                        tooltip=enabled and {"gui.ghost-counter-set-temporary-request"} or
-                            {"gui.ghost-counter-existing-logistic-request"},
+                        tooltip=enabled and {"ghost-counter-gui.set-temporary-request-tooltip"} or
+                            {"ghost-counter-gui.existing-logistic-request-tooltip"},
                         tags={ghost_counter_request=request.name}
                     }
                 end
@@ -277,8 +279,8 @@ function Gui.make_row(player_index, request)
             caption=diff,
             enabled=enabled,
             style=style,
-            tooltip=enabled and {"gui.ghost-counter-set-temporary-request"} or
-                {"gui.ghost-counter-existing-logistic-request"},
+            tooltip=enabled and {"ghost-counter-gui.set-temporary-request"} or
+                {"ghost-counter-gui.existing-logistic-request"},
             tags={ghost_counter_request=request.name}
         }
     else -- Show request fulfilled sprite
