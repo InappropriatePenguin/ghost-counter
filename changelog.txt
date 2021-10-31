@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Date: 2021-10-31
+  Features:
+    - Added support for module requests in already built entities when using the selection tool. Once all the module requests for an entity are fulfilled, the ghost count will update to reflect that.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Date: 2021-10-31
   Features:
