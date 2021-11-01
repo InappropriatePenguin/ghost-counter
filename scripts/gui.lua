@@ -176,7 +176,18 @@ function make_request_button_properties(request, one_time_request)
         ((logistic_request.min or 0) < request.count) and NAME.style.ghost_request_button or
             NAME.style.ghost_request_active_button
 
-    return enabled, style
+    local str = "[" .. request.type .. "=" .. request.name .. "] "
+
+    local tooltip
+    if enabled then
+        tooltip = ((logistic_request.min or 0) < request.count) and
+            {"ghost-counter-gui.set-temporary-request-tooltip", request.count, str} or
+            {"ghost-counter-gui.unset-temporary-request-tooltip"}
+    else
+        tooltip = {"ghost-counter-gui.existing-logistic-request-tooltip"}
+    end
+
+    return enabled, style, tooltip
 end
 
 ---Updates the list of request frames in the GUI
@@ -187,9 +198,16 @@ function Gui.update_list(player_index)
 
     local indices = {count=1, sprite=2, label=3, inventory=4, request=5}
 
-    -- Destroy any child elements in parent scroll pane
+    -- Update gui elements with new values
     for name, frame in pairs(playerdata.gui.requests) do
         local request = playerdata.job.requests[name]
+
+        local localized_name
+        if request.type == "item" then
+            localized_name = game.item_prototypes[request.name].localised_name
+        elseif request.type == "tile" then
+            localized_name = game.tile_prototypes[request.name].localised_name
+        end
 
         if request.count > 0 or not playerdata.options.hide_empty_requests then
             frame.visible = true
@@ -205,16 +223,14 @@ function Gui.update_list(player_index)
             -- If amount needed exceeds amount in inventory, show request button
             local request_element = frame.children[indices.request]
             if diff > 0 then
-                local enabled, style = make_request_button_properties(request,
+                local enabled, style, tooltip = make_request_button_properties(request,
                                            playerdata.logistic_requests[request.name])
 
                 if request_element.type == "button" then
                     request_element.enabled = enabled
                     request_element.style = style
                     request_element.caption = diff
-                    request_element.tooltip = enabled and
-                                                  {"ghost-counter-gui.set-temporary-request-tooltip"} or
-                                                  {"ghost-counter-gui.existing-logistic-request-tooltip"}
+                    request_element.tooltip = tooltip
                 else
                     frame.children[indices.request].destroy()
                     frame.add{
@@ -222,8 +238,7 @@ function Gui.update_list(player_index)
                         caption=diff,
                         enabled=enabled,
                         style=style,
-                        tooltip=enabled and {"ghost-counter-gui.set-temporary-request-tooltip"} or
-                            {"ghost-counter-gui.existing-logistic-request-tooltip"},
+                        tooltip=tooltip,
                         tags={ghost_counter_request=request.name}
                     }
                 end
@@ -256,11 +271,11 @@ function Gui.make_row(player_index, request)
     local playerdata = get_make_playerdata(player_index)
     local parent = playerdata.gui.requests_container
 
-    local prototype
+    local localized_name
     if request.type == "item" then
-        prototype = game.item_prototypes[request.name]
+        localized_name = game.item_prototypes[request.name].localised_name
     elseif request.type == "tile" then
-        prototype = game.tile_prototypes[request.name]
+        localized_name = game.tile_prototypes[request.name].localised_name
     end
 
     -- Row frame
@@ -279,7 +294,7 @@ function Gui.make_row(player_index, request)
     }
 
     -- Item or tile localized name
-    frame.add{type="label", caption=prototype.localised_name, style=NAME.style.ghost_name_label}
+    frame.add{type="label", caption=localized_name, style=NAME.style.ghost_name_label}
 
     -- Amount in inventory
     frame.add{type="label", caption=request.inventory, style=NAME.style.inventory_number_label}
@@ -289,7 +304,7 @@ function Gui.make_row(player_index, request)
 
     -- Show one-time request logistic button
     if diff > 0 then
-        local enabled, style = make_request_button_properties(request,
+        local enabled, style, tooltip = make_request_button_properties(request,
                                    playerdata.logistic_requests[request.name])
 
         frame.add{
@@ -297,8 +312,7 @@ function Gui.make_row(player_index, request)
             caption=diff,
             enabled=enabled,
             style=style,
-            tooltip=enabled and {"ghost-counter-gui.set-temporary-request-tooltip"} or
-                {"ghost-counter-gui.existing-logistic-request-tooltip"},
+            tooltip=tooltip,
             tags={ghost_counter_request=request.name}
         }
     else -- Show request fulfilled sprite
