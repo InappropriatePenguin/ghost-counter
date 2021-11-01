@@ -2,15 +2,15 @@
 Version: 1.1.4
 Date: 2021-10-31
   Features:
-    - Added support for module requests in already built entities when using the selection tool. Once all the module requests for an entity are fulfilled, the ghost count will update to reflect that.
+    - Added support for module requests in already-built entities when using the selection tool. Once all the module requests of an entity are fulfilled, the ghost count will be updated to reflect that.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Date: 2021-10-31
   Features:
-    - Added support for exporting ghost counts as signals. Click on the button in the top left of the mod window to generate a blueprint with constant combinators set to output the ghost counts.
+    - Added support for exporting ghost counts as signals. Click on the button in the top left of the mod window to generate a blueprint with constant combinators, set to output the ghost counts.
   Bugfixes:
-    - Fixed crash which could occur if you closed the ghost counter window while you still had pending temporary logistic requests, and then modified their own logistic requests.
-    - Fixed temporary logistic requests not immediately updating after selection of a new area or blueprint with pre-existing requests.
+    - Fixed crash which could occur if you closed the ghost counter window while you still had pending temporary logistic requests, and then modified your logistic requests yourself or using a different mod.
+    - Fixed temporary logistic requests not immediately updating after selection of a new area or blueprint with pre-existing temporary requests.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: 2021-10-31
