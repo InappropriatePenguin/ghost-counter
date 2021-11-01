@@ -2,7 +2,7 @@ local guistyle = data.raw["gui-style"]["default"]
 
 guistyle[NAME.style.root_frame] = {type="frame_style", width=422}
 
-guistyle[NAME.style.titlebar_flow] = {type="horizontal_flow_style", horizontal_spacing=8}
+guistyle[NAME.style.titlebar_flow] = {type="horizontal_flow_style", horizontal_spacing=6}
 
 guistyle[NAME.style.titlebar_space_header] = {
     type="empty_widget_style",
