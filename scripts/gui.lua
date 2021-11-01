@@ -213,8 +213,8 @@ function Gui.update_list(player_index)
                     request_element.style = style
                     request_element.caption = diff
                     request_element.tooltip = enabled and
-                                                  {"ghost-counter-gui.set-temporary-request"} or
-                                                  {"ghost-counter-gui.existing-logistic-request"}
+                                                  {"ghost-counter-gui.set-temporary-request-tooltip"} or
+                                                  {"ghost-counter-gui.existing-logistic-request-tooltip"}
                 else
                     frame.children[indices.request].destroy()
                     frame.add{
@@ -297,8 +297,8 @@ function Gui.make_row(player_index, request)
             caption=diff,
             enabled=enabled,
             style=style,
-            tooltip=enabled and {"ghost-counter-gui.set-temporary-request"} or
-                {"ghost-counter-gui.existing-logistic-request"},
+            tooltip=enabled and {"ghost-counter-gui.set-temporary-request-tooltip"} or
+                {"ghost-counter-gui.existing-logistic-request-tooltip"},
             tags={ghost_counter_request=request.name}
         }
     else -- Show request fulfilled sprite
