@@ -176,7 +176,7 @@ function make_request_button_properties(request, one_time_request)
         ((logistic_request.min or 0) < request.count) and NAME.style.ghost_request_button or
             NAME.style.ghost_request_active_button
 
-    local str = "[" .. request.type .. "=" .. request.name .. "] "
+    local str = "[item=" .. request.name .. "] "
 
     local tooltip
     if enabled then
@@ -201,13 +201,6 @@ function Gui.update_list(player_index)
     -- Update gui elements with new values
     for name, frame in pairs(playerdata.gui.requests) do
         local request = playerdata.job.requests[name]
-
-        local localized_name
-        if request.type == "item" then
-            localized_name = game.item_prototypes[request.name].localised_name
-        elseif request.type == "tile" then
-            localized_name = game.tile_prototypes[request.name].localised_name
-        end
 
         if request.count > 0 or not playerdata.options.hide_empty_requests then
             frame.visible = true
@@ -271,12 +264,7 @@ function Gui.make_row(player_index, request)
     local playerdata = get_make_playerdata(player_index)
     local parent = playerdata.gui.requests_container
 
-    local localized_name
-    if request.type == "item" then
-        localized_name = game.item_prototypes[request.name].localised_name
-    elseif request.type == "tile" then
-        localized_name = game.tile_prototypes[request.name].localised_name
-    end
+    local localized_name = game.item_prototypes[request.name].localised_name
 
     -- Row frame
     local frame = parent.add{type="frame", direction="horizontal", style=NAME.style.row_frame}
@@ -288,7 +276,7 @@ function Gui.make_row(player_index, request)
     -- Entity or tile sprite
     frame.add{
         type="sprite",
-        sprite=request.type .. "/" .. request.name,
+        sprite="item/" .. request.name,
         resize_to_sprite=false,
         style=NAME.style.ghost_sprite
     }

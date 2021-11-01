@@ -20,12 +20,11 @@ function get_make_playerdata(player_index)
     return playerdata
 end
 
----Returns an empty request table with the given item/tile name and type
----@param name string Item or tile name
----@param type string "item"|"tile"
+---Returns an empty request table for the given item
+---@param name string Item name
 ---@return table request
-function make_empty_request(name, type)
-    return {name=name, type=type, count=0, inventory=0, logistic_request={}}
+function make_empty_request(name)
+    return {name=name, count=0, inventory=0, logistic_request={}}
 end
 
 ---Sorts a `requests` table by count, in descending order
@@ -63,13 +62,15 @@ function get_selection_counts(entities, ignore_tiles)
     local insert = table.insert
     for _, entity in pairs(entities) do
         local entity_type = entity.type
-        if entity_type == "entity-ghost" then
+        if entity_type == "entity-ghost" or (entity_type == "tile-ghost" and not ignore_tiles) then
             local ghost_name = entity.ghost_name
             local unit_number = entity.unit_number
 
             -- Get item to place entity, from prototype if necessary
             if not cache[ghost_name] then
-                local prototype = game.entity_prototypes[ghost_name]
+                local prototype = entity_type == "entity-ghost" and
+                                    game.entity_prototypes[ghost_name] or
+                                    game.tile_prototypes[ghost_name]
                 cache[ghost_name] = {
                     item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
                 }
@@ -80,16 +81,16 @@ function get_selection_counts(entities, ignore_tiles)
             -- If entity is associated with item, increment request for that item by `item.count`
             local item = cache[ghost_name].item
             if item then
-                requests[item.name] = requests[item.name] or make_empty_request(item.name, "item")
+                requests[item.name] = requests[item.name] or make_empty_request(item.name)
                 requests[item.name].count = requests[item.name].count + item.count
                 insert(ghosts[unit_number], item)
             end
 
             -- If entity has module requests, increment request for each module type
-            local item_requests = entity.item_requests
+            local item_requests = entity_type == "entity-ghost" and entity.item_requests or nil
             if item_requests and table_size(item_requests) > 0 then
                 for name, val in pairs(item_requests) do
-                    requests[name] = requests[name] or make_empty_request(name, "item")
+                    requests[name] = requests[name] or make_empty_request(name)
                     requests[name].count = requests[name].count + val
                     insert(ghosts[unit_number], {name=name, count=val})
                 end
@@ -100,18 +101,10 @@ function get_selection_counts(entities, ignore_tiles)
             local unit_number = entity.unit_number
             ghosts[unit_number] = {}
             for name, val in pairs(entity.item_requests) do
-                requests[name] = requests[name] or make_empty_request(name, "item")
+                requests[name] = requests[name] or make_empty_request(name)
                 requests[name].count = requests[name].count + val
                 insert(ghosts[unit_number], {name=name, count=val})
             end
-            script.register_on_entity_destroyed(entity)
-        elseif entity_type == "tile-ghost" and not ignore_tiles then
-            local ghost_name = entity.ghost_name
-
-            requests[ghost_name] = requests[ghost_name] or make_empty_request(ghost_name, "tile")
-            requests[ghost_name].count = requests[ghost_name].count + 1
-            ghosts[entity.unit_number] = {{name=ghost_name, count=1}}
-
             script.register_on_entity_destroyed(entity)
         end
     end
@@ -125,21 +118,21 @@ end
 ---@return table requests
 function get_blueprint_counts(entities, tiles)
     local requests = {}
-    local entity_cache = {}
+    local cache = {}
 
     -- Iterate over blueprint entities
     for _, entity in pairs(entities) do
-        if not entity_cache[entity.name] then
+        if not cache[entity.name] then
             local prototype = game.entity_prototypes[entity.name]
-            entity_cache[entity.name] = {
+            cache[entity.name] = {
                 item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
             }
         end
 
         -- If entity is associated with item, increment request for that item by `item.count`
-        local item = entity_cache[entity.name].item
+        local item = cache[entity.name].item
         if item then
-            requests[item.name] = requests[item.name] or make_empty_request(item.name, "item")
+            requests[item.name] = requests[item.name] or make_empty_request(item.name)
             requests[item.name].count = requests[item.name].count + item.count
         end
 
@@ -147,7 +140,7 @@ function get_blueprint_counts(entities, tiles)
         local item_requests = entity.items
         if item_requests and table_size(item_requests) > 0 then
             for name, val in pairs(item_requests) do
-                requests[name] = requests[name] or make_empty_request(name, "item")
+                requests[name] = requests[name] or make_empty_request(name)
                 requests[name].count = requests[name].count + val
             end
         end
@@ -155,8 +148,19 @@ function get_blueprint_counts(entities, tiles)
 
     -- Iterate over blueprint tiles
     for _, tile in pairs(tiles) do
-        requests[tile.name] = requests[tile.name] or make_empty_request(tile.name, "tile")
-        requests[tile.name].count = requests[tile.name].count + 1
+        if not cache[tile.name] then
+            local prototype = game.tile_prototypes[tile.name]
+            cache[tile.name] = {
+                item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
+            }
+        end
+
+        -- If tile is associated with item, increment request for that item by `item.count`
+        local item = cache[tile.name].item
+        if item then
+            requests[item.name] = requests[item.name] or make_empty_request(item.name)
+            requests[item.name].count = requests[item.name].count + item.count
+        end
     end
 
     return requests
@@ -180,11 +184,11 @@ function make_combinators_blueprint(player_index)
     local combinators = {}
 
     -- Iterate over the number of constant combinators we will need
-    for i = 1, math.ceil(#requests/n_slots) do
+    for i = 1, math.ceil(#requests / n_slots) do
         combinators[i] = {
             entity_number=i,
             name="constant-combinator",
-            position={i-0.5, 0},
+            position={i - 0.5, 0},
             direction=4,
             control_behavior={filters={}},
             connections={{}}
@@ -208,8 +212,8 @@ function make_combinators_blueprint(player_index)
         for i = 1, (#combinators - 1) do
             local connections = combinators[i].connections[1]
 
-            connections["green"] = {{entity_id=i+1}}
-            connections["red"] = {{entity_id=i+1}}
+            connections["green"] = {{entity_id=i + 1}}
+            connections["red"] = {{entity_id=i + 1}}
         end
     end
 
