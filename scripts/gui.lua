@@ -270,10 +270,10 @@ function Gui.make_row(player_index, request)
     local frame = parent.add{type="frame", direction="horizontal", style=NAME.style.row_frame}
     playerdata.gui.requests[request.name] = frame
 
-    -- Ghost count
+    -- Ghost (item) count
     frame.add{type="label", caption=request.count, style=NAME.style.ghost_number_label}
 
-    -- Entity or tile sprite
+    -- Item sprite
     frame.add{
         type="sprite",
         sprite="item/" .. request.name,

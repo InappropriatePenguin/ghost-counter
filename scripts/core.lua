@@ -49,7 +49,7 @@ function sort_requests(requests)
     return requests_sorted
 end
 
----Iterates over passed entities and counts ghost entities and tiles
+---Iterates over passed entities and counts items needed to build all ghost entities and tiles
 ---@param entities table table of entities
 ---@param ignore_tiles boolean Determines whether ghost tiles are counted
 ---@return table ghosts table of actual ghost entities/tiles
@@ -112,7 +112,7 @@ function get_selection_counts(entities, ignore_tiles)
     return ghosts, requests
 end
 
----Processes blueprint entities and tiles to generate request counts
+---Processes blueprint entities and tiles to generate item request counts
 ---@param entities table array of blueprint entities
 ---@param tiles table array of blueprint tiles
 ---@return table requests
@@ -327,9 +327,9 @@ function get_first_empty_slot(player_index)
     end
 end
 
----Gets a table with details of any existing logistic request for a given item or tile
+---Gets a table with details of any existing logistic request for a given item
 ---@param player_index number Player index
----@param name string Item or tile name
+---@param name string Item name
 ---@return table|nil logistic_request
 function get_existing_logistic_request(player_index, name)
     local playerdata = get_make_playerdata(player_index)
@@ -353,7 +353,7 @@ function make_one_time_logistic_request(player_index, name)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.luaplayer.character then return end
 
-    --  Abort if player already has more of item/tile in inventory than needed
+    --  Abort if player already has more of item in inventory than needed
     local request = playerdata.job.requests[name]
     if not request or request.inventory >= request.count then return end
 
@@ -396,7 +396,7 @@ end
 ---Restores the prior logistic request (if any) that was in place before the one-time request was
 ---made
 ---@param player_index number Player index
----@param name string Item or tile name
+---@param name string Item name
 function restore_prior_logistic_request(player_index, name)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.luaplayer.character then return end
