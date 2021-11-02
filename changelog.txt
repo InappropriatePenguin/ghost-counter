@@ -2,8 +2,8 @@
 Version: 1.1.5
 Date: 2021-11-01
   Features:
-    - Improve tile counting logic
-    - Improve temporary request button tooltips
+    - Improved tile counting logic
+    - Improved temporary request button tooltips
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.4
 Date: 2021-10-31
