@@ -97,6 +97,7 @@ function Gui.make_gui(player_index)
         sprite="utility/close_white",
         hovered_sprite="utility/close_black",
         clicked_sprite="utility/close_black",
+        tooltip={"ghost-counter-gui.close-button-tooltip"},
         style="close_button"
     }
 
