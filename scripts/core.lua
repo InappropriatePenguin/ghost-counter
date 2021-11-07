@@ -1,6 +1,6 @@
 ---Gets or makes playerdata table
 ---@param player_index number LuaPlayer index
----@return table playerdata playerdata table
+---@return Playerdata playerdata
 function get_make_playerdata(player_index)
     local playerdata = global.playerdata[player_index]
 
@@ -22,14 +22,14 @@ end
 
 ---Returns an empty request table for the given item
 ---@param name string Item name
----@return table request
+---@return Request request
 function make_empty_request(name)
     return {name=name, count=0, inventory=0, logistic_request={}}
 end
 
 ---Sorts a `requests` table by count, in descending order
----@param requests table `requests` table
----@return table requests_sorted
+---@param requests table<string, Request> Table of requests to be sorted
+---@return Request[] requests_sorted
 function sort_requests(requests)
     local requests_sorted = {}
     for _, request in pairs(requests) do table.insert(requests_sorted, request) end

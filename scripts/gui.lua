@@ -324,7 +324,7 @@ function Gui.make_row(player_index, request)
 end
 
 ---Event handler for GUI button clicks
----@param event table Event table
+---@param event on_gui_click Event table
 function Gui.on_gui_click(event)
     local player_index = event.player_index
     local element = event.element
