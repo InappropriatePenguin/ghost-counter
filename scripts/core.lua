@@ -106,6 +106,29 @@ function get_selection_counts(entities, ignore_tiles)
                 insert(ghosts[unit_number], {name=name, count=val})
             end
             script.register_on_entity_destroyed(entity)
+        elseif entity.to_be_upgraded() then
+            local unit_number = entity.unit_number
+            local prototype = entity.get_upgrade_target()
+            local ghost_name = prototype.name
+
+            -- Get item to place entity, from prototype if necessary
+            if not cache[ghost_name] then
+                cache[ghost_name] = {
+                    item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
+                }
+            end
+
+            ghosts[unit_number] = {}
+
+            -- If entity is associated with item, increment request for that item by `item.count`
+            local item = cache[ghost_name].item
+            if item then
+                requests[item.name] = requests[item.name] or make_empty_request(item.name)
+                requests[item.name].count = requests[item.name].count + item.count
+                insert(ghosts[unit_number], item)
+            end
+
+            script.register_on_entity_destroyed(entity)
         end
     end
 
