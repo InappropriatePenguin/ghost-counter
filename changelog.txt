@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.7
+Date: 2022-04-14
+  Bugfixes:
+    - Fixed GUI appearing inappropriately when a player uses unrelated area selection tools.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.6
 Date: 2022-03-23
   Features:
