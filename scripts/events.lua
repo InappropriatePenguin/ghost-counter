@@ -2,7 +2,7 @@
 ---@param event on_player_selected_area Event table
 ---@param ignore_tiles boolean Determines whether tiles are included in count
 function on_player_selected_area(event, ignore_tiles)
-    if not event.item == NAME.tool.ghost_counter then return end
+    if event.item ~= NAME.tool.ghost_counter then return end
 
     local ghosts, requests = get_selection_counts(event.entities, ignore_tiles)
 
