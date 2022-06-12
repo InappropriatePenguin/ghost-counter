@@ -104,6 +104,24 @@ function on_entity_logistic_slot_changed(event)
     register_update(player_index, event.tick)
 end
 
+---Triggers an update if the player respawns.
+---@param event on_player_respawned Event data
+function on_player_respawned(event)
+    local playerdata = get_make_playerdata(event.player_index)
+    if not playerdata.is_active then return end
+    register_update(playerdata.index, event.tick)
+end
+script.on_event(defines.events.on_player_respawned, on_player_respawned)
+
+---Triggers an update if the player dies.
+---@param event on_player_died Event data
+function on_player_died(event)
+    local playerdata = get_make_playerdata(event.player_index)
+    if not playerdata.is_active then return end
+    register_update(playerdata.index, event.tick)
+end
+script.on_event(defines.events.on_player_died, on_player_died)
+
 ---Handles `on_entity_destroyed` by looking up `event.unit_number` in ghost tables and updates
 ---requests tables where appropriate
 ---@param event on_entity_destroyed Event table

@@ -266,7 +266,7 @@ function update_inventory_info(player_index)
     local playerdata = get_make_playerdata(player_index)
     local cursor_stack = playerdata.luaplayer.cursor_stack
     local inventory = playerdata.luaplayer.get_main_inventory()
-    local contents = inventory.get_contents()
+    local contents = inventory and inventory.get_contents() or {}
     local requests = playerdata.job.requests
 
     -- Iterate over each request and get the count in inventory
