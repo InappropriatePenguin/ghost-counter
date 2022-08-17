@@ -94,6 +94,7 @@ function on_runtime_mod_setting_changed(event)
 
         -- Reregister on_nth_tick event handler using the new minimum interval
         if global.events.nth_tick then
+            ---@diagnostic disable-next-line
             script.on_nth_tick(nil)
             script.on_nth_tick(new_value, on_nth_tick)
         end

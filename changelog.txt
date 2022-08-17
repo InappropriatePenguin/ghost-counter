@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.9
+Date: 2022-06-20
+  Bugfixes:
+    - Fixed a crash that would occur if you tried to count ghosts from a blueprint book in your inventory.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.8
 Date: 2022-06-12
   Bugfixes:

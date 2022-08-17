@@ -135,6 +135,18 @@ function get_selection_counts(entities, ignore_tiles)
     return ghosts, requests
 end
 
+---Returns the blueprint tiles contained within a given item stack.
+---@param item_stack LuaItemStack Must be a blueprint or a blueprint-book
+---@return Tile[] tiles
+function get_blueprint_tiles(item_stack)
+    if item_stack.is_blueprint_book then
+        local inventory = item_stack.get_inventory(defines.inventory.item_main)
+        return get_blueprint_tiles(inventory[item_stack.active_index])
+    else
+        return (item_stack.get_blueprint_tiles() or {})
+    end
+end
+
 ---Processes blueprint entities and tiles to generate item request counts
 ---@param entities table array of blueprint entities
 ---@param tiles table array of blueprint tiles
@@ -482,6 +494,7 @@ function register_nth_tick_handler(state)
         script.on_nth_tick(global.settings.min_update_interval, on_nth_tick)
     elseif state == false and global.events.nth_tick then
         global.events.nth_tick = false
+        ---@diagnostic disable-next-line
         script.on_nth_tick(nil)
     end
 end

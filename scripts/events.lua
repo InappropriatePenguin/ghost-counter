@@ -42,7 +42,7 @@ function on_player_selected_blueprint(event)
     local tiles = {}
     if (playerdata.luaplayer.is_cursor_blueprint() and
         playerdata.luaplayer.cursor_stack.valid_for_read) then
-        tiles = playerdata.luaplayer.cursor_stack.get_blueprint_tiles() or {}
+        tiles = get_blueprint_tiles(playerdata.luaplayer.cursor_stack)
     end
 
     -- Abort if player not holding blueprint or empty blueprint
