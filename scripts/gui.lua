@@ -168,6 +168,7 @@ end
 ---@param one_time_request table `playerdata.logistic_requests[request.name]`
 ---@return boolean enabled Whehter button should be enabled
 ---@return string style Style that should be applied to the button
+---@return LocalisedString tooltip Tooltip shown for button
 function make_request_button_properties(request, one_time_request)
     local logistic_request = request.logistic_request or {}
 

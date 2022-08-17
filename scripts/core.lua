@@ -50,9 +50,9 @@ function sort_requests(requests)
 end
 
 ---Iterates over passed entities and counts items needed to build all ghost entities and tiles
----@param entities table table of entities
+---@param entities LuaEntity[] table of entities
 ---@param ignore_tiles boolean Determines whether ghost tiles are counted
----@return table ghosts table of actual ghost entities/tiles
+---@return table<uint, LuaEntity> ghosts table of actual ghost entities/tiles
 ---@return table requests table of requests, indexed by request name
 function get_selection_counts(entities, ignore_tiles)
     local ghosts, requests = {}, {}
