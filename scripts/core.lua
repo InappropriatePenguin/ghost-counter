@@ -64,7 +64,7 @@ function get_selection_counts(entities, ignore_tiles)
         local entity_type = entity.type
         if entity_type == "entity-ghost" or (entity_type == "tile-ghost" and not ignore_tiles) then
             local ghost_name = entity.ghost_name
-            local unit_number = entity.unit_number
+            local unit_number = entity.unit_number --[[@as uint]]
 
             -- Get item to place entity, from prototype if necessary
             if not cache[ghost_name] then
@@ -98,7 +98,7 @@ function get_selection_counts(entities, ignore_tiles)
 
             script.register_on_entity_destroyed(entity)
         elseif entity_type == "item-request-proxy" then
-            local unit_number = entity.unit_number
+            local unit_number = entity.unit_number --[[@as uint]]
             ghosts[unit_number] = {}
             for name, val in pairs(entity.item_requests) do
                 requests[name] = requests[name] or make_empty_request(name)
@@ -107,8 +107,8 @@ function get_selection_counts(entities, ignore_tiles)
             end
             script.register_on_entity_destroyed(entity)
         elseif entity.to_be_upgraded() then
-            local unit_number = entity.unit_number
-            local prototype = entity.get_upgrade_target()
+            local unit_number = entity.unit_number --[[@as uint]]
+            local prototype = entity.get_upgrade_target() --[[@as LuaEntityPrototype]]
             local ghost_name = prototype.name
 
             -- Get item to place entity, from prototype if necessary
@@ -140,7 +140,7 @@ end
 ---@return Tile[] tiles
 function get_blueprint_tiles(item_stack)
     if item_stack.is_blueprint_book then
-        local inventory = item_stack.get_inventory(defines.inventory.item_main)
+        local inventory = item_stack.get_inventory(defines.inventory.item_main) --[[@as LuaInventory]]
         return get_blueprint_tiles(inventory[item_stack.active_index])
     else
         return (item_stack.get_blueprint_tiles() or {})
@@ -304,7 +304,7 @@ function update_logistics_info(player_index)
     -- Iterate over each logistic slot and update request table with logistic request details
     local logistic_requests = {}
     for i = 1, character.request_slot_count do
-        local slot = playerdata.luaplayer.get_personal_logistic_slot(i)
+        local slot = playerdata.luaplayer.get_personal_logistic_slot(i --[[@as uint]])
         if requests[slot.name] then
             requests[slot.name].logistic_request = {slot_index=i, min=slot.min, max=slot.max}
             logistic_requests[slot.name] = true
@@ -323,7 +323,7 @@ function update_one_time_logistic_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.luaplayer.character then return end
 
-    local inventory = playerdata.luaplayer.get_main_inventory()
+    local inventory = playerdata.luaplayer.get_main_inventory() --[[@as LuaInventory]]
 
     -- Iterate over one-time requests table and restore old requests if they have been fulfilled
     for name, logi_req in pairs(playerdata.logistic_requests) do
@@ -350,13 +350,14 @@ end
 
 ---Iterates over player's logistic slots and returns the first empty slot
 ---@param player_index number Player index
----@return number slot_index First empty slot
+---@return uint? slot_index First empty slot
 function get_first_empty_slot(player_index)
     local playerdata = get_make_playerdata(player_index)
     local character = playerdata.luaplayer.character
     if not character then return end
 
     for slot_index = 1, character.request_slot_count + 1 do
+        ---@cast slot_index uint
         local slot = playerdata.luaplayer.get_personal_logistic_slot(slot_index)
         if slot.name == nil then return slot_index end
     end
@@ -372,6 +373,7 @@ function get_existing_logistic_request(player_index, name)
     if not character then return nil end
 
     for i = 1, character.request_slot_count do
+        ---@cast i uint
         local slot = playerdata.luaplayer.get_personal_logistic_slot(i)
         if slot and slot.name == name then
             return {slot_index=i, name=slot.name, min=slot.min, max=slot.max}

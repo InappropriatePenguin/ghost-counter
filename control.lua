@@ -11,8 +11,8 @@ function on_init()
     ---@type number Last game tick where an event updated mod data
     global.last_event = 0
 
-    ---@type table<string, number> Map settings table
-    global.settings = {min_update_interval=settings.global[NAME.setting.min_update_interval].value}
+    ---@type {min_update_interval: uint} Map settings table
+    global.settings = {min_update_interval=settings.global[NAME.setting.min_update_interval].value --[[@as uint]]}
 
     ---@type table<string, boolean> Contains registration status of different event handler groups
     global.events = {inventory=false, logistics=false, nth_tick=false}
@@ -90,7 +90,7 @@ script.on_event(defines.events.on_player_removed, on_player_removed)
 ---@param event on_runtime_mod_setting_changed Event table
 function on_runtime_mod_setting_changed(event)
     if event.setting == NAME.setting.min_update_interval then
-        local new_value = settings.global[NAME.setting.min_update_interval].value
+        local new_value = settings.global[NAME.setting.min_update_interval].value --[[@as uint]]
 
         -- Reregister on_nth_tick event handler using the new minimum interval
         if global.events.nth_tick then

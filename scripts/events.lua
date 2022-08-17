@@ -28,8 +28,10 @@ function on_player_selected_area(event, ignore_tiles)
     end
 end
 script.on_event(defines.events.on_player_selected_area,
+    ---@param event on_player_selected_area
     function(event) on_player_selected_area(event, true) end)
-script.on_event(defines.events.on_player_alt_selected_area,
+    script.on_event(defines.events.on_player_alt_selected_area,
+    ---@param event on_player_selected_area
     function(event) on_player_selected_area(event, false) end)
 
 ---Handles the player using the blueprint hotkey

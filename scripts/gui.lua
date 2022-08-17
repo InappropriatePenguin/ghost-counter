@@ -336,7 +336,7 @@ function Gui.on_gui_click(event)
     elseif element.tags and element.tags.ghost_counter_request then
         -- One-time logistic request button
         local playerdata = get_make_playerdata(player_index)
-        local request_name = element.tags.ghost_counter_request
+        local request_name = element.tags.ghost_counter_request --[[@as string]]
         if not playerdata.logistic_requests[request_name] then
             make_one_time_logistic_request(player_index, request_name)
             Gui.update_list(player_index)
