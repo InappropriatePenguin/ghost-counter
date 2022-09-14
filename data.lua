@@ -85,6 +85,24 @@ data:extend{
         scale=0.5
     }, {
         type="sprite",
+        name=NAME.sprite.craft_all_white,
+        filename="__ghost-counter__/graphics/craft-all-white.png",
+        priority="medium",
+        width=32,
+        height=32,
+        flags={"gui-icon"},
+        scale=0.5
+    }, {
+        type="sprite",
+        name=NAME.sprite.craft_all_black,
+        filename="__ghost-counter__/graphics/craft-all-black.png",
+        priority="medium",
+        width=32,
+        height=32,
+        flags={"gui-icon"},
+        scale=0.5
+    }, {
+        type="sprite",
         name=NAME.sprite.cancel_white,
         filename="__ghost-counter__/graphics/cancel-white.png",
         priority="medium",
