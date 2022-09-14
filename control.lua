@@ -1,4 +1,6 @@
-require("scripts/constants")
+mod_prefix = "ghost-counter-"
+NAME = require("shared/constants")
+
 require("scripts/core")
 require("scripts/events")
 require("scripts/gui")

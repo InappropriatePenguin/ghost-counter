@@ -1,3 +1,4 @@
+local NAME = require("shared/constants")
 local guistyle = data.raw["gui-style"]["default"]
 
 guistyle[NAME.style.root_frame] = {type="frame_style", width=422}

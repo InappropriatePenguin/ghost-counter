@@ -1,4 +1,5 @@
-require("scripts/constants")
+local NAME = require("shared/constants")
+
 require("prototypes/style")
 
 data:extend{
