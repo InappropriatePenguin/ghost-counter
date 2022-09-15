@@ -7,10 +7,10 @@ require("scripts/gui")
 
 ---Create playerdata table
 function on_init()
-    ---@type table<number, table> Table of all `playerdata` tables, indexed by `player_index`
+    ---@type table<uint, Playerdata> Table of all `playerdata` tables, indexed by `player_index`
     global.playerdata = {}
 
-    ---@type number Last game tick where an event updated mod data
+    ---@type uint Last game tick where an event updated mod data
     global.last_event = 0
 
     ---@type {min_update_interval: uint} Map settings table

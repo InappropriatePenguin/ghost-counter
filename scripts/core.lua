@@ -1,5 +1,5 @@
----Gets or makes playerdata table
----@param player_index number LuaPlayer index
+---Gets or makes playerdata table.
+---@param player_index uint LuaPlayer index
 ---@return Playerdata playerdata
 function get_make_playerdata(player_index)
     local playerdata = global.playerdata[player_index]
@@ -202,7 +202,7 @@ function get_blueprint_counts(entities, tiles)
 end
 
 ---Converts `job.requests` to signals out of a series of constant combinators
----@param player_index number Player index
+---@param player_index uint Player index
 function make_combinators_blueprint(player_index)
     local playerdata = get_make_playerdata(player_index)
 
@@ -264,7 +264,7 @@ function make_combinators_blueprint(player_index)
 end
 
 ---Deletes requests with zero ghosts from the `job.requests` table
----@param player_index number Player index
+---@param player_index uint Player index
 function remove_empty_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
     for name, request in pairs(playerdata.job.requests) do
@@ -273,7 +273,7 @@ function remove_empty_requests(player_index)
 end
 
 ---Updates `job.requests` with inventory and cursor stack contents
----@param player_index number Player index
+---@param player_index uint Player index
 function update_inventory_info(player_index)
     local playerdata = get_make_playerdata(player_index)
     local cursor_stack = playerdata.luaplayer.cursor_stack
@@ -292,7 +292,7 @@ function update_inventory_info(player_index)
 end
 
 ---Updates the `job.requests` table with the player's current logistic requests
----@param player_index number Player index
+---@param player_index uint Player index
 function update_logistics_info(player_index)
     local playerdata = get_make_playerdata(player_index)
     local requests = playerdata.job.requests
@@ -318,7 +318,7 @@ function update_logistics_info(player_index)
 end
 
 ---Iterates over one-time requests table and restores old requests if they have been fulfilled
----@param player_index number Player index
+---@param player_index uint Player index
 function update_one_time_logistic_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.luaplayer.character then return end
@@ -364,7 +364,7 @@ function get_first_empty_slot(player_index)
 end
 
 ---Gets a table with details of any existing logistic request for a given item
----@param player_index number Player index
+---@param player_index uint Player index
 ---@param name string Item name
 ---@return table|nil logistic_request
 function get_existing_logistic_request(player_index, name)
@@ -433,7 +433,7 @@ end
 
 ---Restores the prior logistic request (if any) that was in place before the one-time request was
 ---made
----@param player_index number Player index
+---@param player_index uint Player index
 ---@param name string Item name
 function restore_prior_logistic_request(player_index, name)
     local playerdata = get_make_playerdata(player_index)
@@ -464,7 +464,7 @@ function restore_prior_logistic_request(player_index, name)
 end
 
 ---Iterates over `playerdata.logistic_requests` to get rid of them
----@param player_index number Player index
+---@param player_index uint Player index
 function cancel_all_one_time_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
     for name, _ in pairs(playerdata.logistic_requests) do
@@ -562,7 +562,7 @@ end
 
 ---Registers that a change in data tables has occured and marks the responsible player as having
 ---data updates to process
----@param player_index number Player index
+---@param player_index uint Player index
 ---@param tick number Tick during which the data update occurred
 function register_update(player_index, tick)
     local playerdata = get_make_playerdata(player_index)

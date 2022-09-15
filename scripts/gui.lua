@@ -1,7 +1,7 @@
 Gui = {}
 
 ---Toggles mod GUI on or off
----@param player_index number Player index
+---@param player_index uint Player index
 ---@param state boolean true -> on, false -> off
 function Gui.toggle(player_index, state)
     local playerdata = get_make_playerdata(player_index)
@@ -35,7 +35,7 @@ function Gui.toggle(player_index, state)
 end
 
 ---Make mod GUI
----@param player_index number Player index
+---@param player_index uint Player index
 function Gui.make_gui(player_index)
     local playerdata = get_make_playerdata(player_index)
     local screen = playerdata.luaplayer.gui.screen
@@ -161,7 +161,7 @@ function Gui.make_gui(player_index)
 end
 
 ---Creates the list of request frames in the GUI
----@param player_index number Player index
+---@param player_index uint Player index
 function Gui.make_list(player_index)
     local playerdata = get_make_playerdata(player_index)
 
@@ -202,7 +202,7 @@ function make_request_button_properties(request, one_time_request)
 end
 
 ---Updates the list of request frames in the GUI
----@param player_index number Player index
+---@param player_index uint Player index
 function Gui.update_list(player_index)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.is_active or not playerdata.gui.requests then return end
@@ -269,7 +269,7 @@ function Gui.update_list(player_index)
 end
 
 ---Generates the row frame for a given request table
----@param player_index number Player index
+---@param player_index uint Player index
 ---@param request table `request` table, containing name, count, inventory, etc.
 function Gui.make_row(player_index, request)
     local playerdata = get_make_playerdata(player_index)
