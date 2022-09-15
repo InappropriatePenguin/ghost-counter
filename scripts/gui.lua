@@ -126,6 +126,15 @@ function Gui.make_gui(player_index)
         style=NAME.style.topbar_space
     }
     toolbar.add{
+        type="sprite-button",
+        name=NAME.gui.craft_all_button,
+        sprite=NAME.sprite.craft_all_white,
+        hovered_sprite=NAME.sprite.craft_all_black,
+        clicked_sprite=NAME.sprite.craft_all_black,
+        tooltip={"ghost-counter-gui.craft-all-tooltip"},
+        style=NAME.style.get_signals_button
+    }
+    toolbar.add{
         type="button",
         name=NAME.gui.request_all_button,
         caption={"ghost-counter-gui.request-all-caption"},
@@ -329,22 +338,42 @@ end
 function Gui.on_gui_click(event)
     local player_index = event.player_index
     local element = event.element
+    local element_name = element.name
 
     if element.name == NAME.gui.close_button then
         -- Close button
         Gui.toggle(player_index, false)
     elseif element.tags and element.tags.ghost_counter_request then
-        -- One-time logistic request button
+        -- One-time logistic request/craft button
         local playerdata = get_make_playerdata(player_index)
         local request_name = element.tags.ghost_counter_request --[[@as string]]
-        if not playerdata.logistic_requests[request_name] then
-            make_one_time_logistic_request(player_index, request_name)
-            Gui.update_list(player_index)
+        if event.shift == true then
+            local request = playerdata.job.requests[request_name]
+            if request then
+                local result, crafted = craft_request(event.player_index, request)
+                local player = game.get_player(player_index) --[[@as LuaPlayer]]
+                if result == "no-crafts-needed" then
+                    player.create_local_flying_text{
+                        text={"ghost-counter-message.crafts-not-needed"},
+                        create_at_cursor=true
+                    }
+                elseif result == "attempted" and crafted == 0 then
+                    player.create_local_flying_text{
+                        text={"ghost-counter-message.crafts-attempted-none"},
+                        create_at_cursor=true
+                    }
+                end
+            end
         else
-            restore_prior_logistic_request(player_index, request_name)
-            Gui.update_list(player_index)
+            if not playerdata.logistic_requests[request_name] then
+                make_one_time_logistic_request(player_index, request_name)
+                Gui.update_list(player_index)
+            else
+                restore_prior_logistic_request(player_index, request_name)
+                Gui.update_list(player_index)
+            end
         end
-    elseif element.name == NAME.gui.hide_empty_button then
+    elseif element_name == NAME.gui.hide_empty_button then
         local playerdata = get_make_playerdata(player_index)
         local new_state = not playerdata.options.hide_empty_requests
         playerdata.options.hide_empty_requests = new_state
@@ -356,9 +385,14 @@ function Gui.on_gui_click(event)
                                      NAME.sprite.hide_empty_black
 
         Gui.update_list(player_index)
-    elseif element.name == NAME.gui.get_signals_button then
+    elseif element_name == NAME.gui.get_signals_button then
         make_combinators_blueprint(event.player_index)
-    elseif element.name == NAME.gui.request_all_button then
+    elseif element_name == NAME.gui.craft_all_button then
+        local playerdata = get_make_playerdata(player_index)
+        for _, request in pairs(playerdata.job.requests) do
+            craft_request(player_index, request)
+        end
+    elseif element_name == NAME.gui.request_all_button then
         local playerdata = get_make_playerdata(player_index)
         for _, request in pairs(playerdata.job.requests) do
             if request.count > 0 and not playerdata.logistic_requests[request.name] then
@@ -367,7 +401,7 @@ function Gui.on_gui_click(event)
         end
 
         Gui.update_list(player_index)
-    elseif element.name == NAME.gui.cancel_all_button then
+    elseif element_name == NAME.gui.cancel_all_button then
         cancel_all_one_time_requests(player_index)
 
         Gui.update_list(player_index)

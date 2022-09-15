@@ -390,7 +390,7 @@ function make_one_time_logistic_request(player_index, name)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.luaplayer.character then return end
 
-    --  Abort if player already has more of item in inventory than needed
+    -- Abort if player already has more of item in inventory than needed
     local request = playerdata.job.requests[name]
     if not request or request.inventory >= request.count then return end
 
@@ -469,6 +469,94 @@ function cancel_all_one_time_requests(player_index)
     for name, _ in pairs(playerdata.logistic_requests) do
         restore_prior_logistic_request(player_index, name)
     end
+end
+
+---Returns the yield of a given item from a single craft of a given recipe.
+---@param item_name string Item name
+---@param recipe LuaRecipePrototype Recipe prototype
+---@return number
+function get_yield_per_craft(item_name, recipe)
+    local yield = 0
+
+    for _, product in pairs(recipe.products) do
+        if product.name == item_name then
+            local probability = product.probability or 1
+            yield = (product.amount) and (product.amount * probability) or
+                ((product.amount_min + product.amount_max) * 0.5 * probability)
+            break
+        end
+    end
+
+    return yield
+end
+
+---Returns the number of times an item is set to be produced by a given character, taking into
+---account their crafting queue contents.
+---@param character LuaEntity Character entity
+---@param item_name string Name of item to craft
+---@return uint item_count
+function get_item_count_from_character_crafting_queue(character, item_name)
+    if character.crafting_queue_size == 0 then return 0 end
+
+    local relevant_recipes = game.get_filtered_recipe_prototypes{
+        {filter="has-product-item", elem_filters={{filter="name", name=item_name}}},
+        {filter="hidden-from-player-crafting", invert=true, mode="and"}
+    }
+    local unique_recipes = {} --[[@as table<string, uint>]]
+    local item_count = 0
+
+    -- Create a list of unique and relevant recipes in the crafting queue
+    for _, queue_item in pairs(character.crafting_queue) do
+        local recipe_name = queue_item.recipe
+        if not queue_item.prerequisite and (unique_recipes[recipe_name] or relevant_recipes[recipe_name]) then
+            unique_recipes[recipe_name] = (unique_recipes[recipe_name] or 0) + queue_item.count
+        end
+    end
+
+    -- Count number of `name` items that will ultimately be produced by recipes in crafting queue
+    for recipe_name, n_crafts in pairs(unique_recipes) do
+        local yield_per_craft = get_yield_per_craft(item_name, relevant_recipes[recipe_name])
+        item_count = item_count + math.floor(yield_per_craft * n_crafts)
+    end
+
+    return item_count --[[@as uint]]
+end
+
+---Crafts a given item; amount to craft based on the corresponding request for that item.
+---@param player_index uint Player index
+---@param request Request Request data
+---@return "no-character"|"no-crafts-needed"|"attempted" result
+---@return uint? items_crafted Number of items crafted
+function craft_request(player_index, request)
+    -- Abort if no player character
+    local playerdata = get_make_playerdata(player_index)
+    local character = playerdata.luaplayer.character
+    if not character then return "no-character" end
+
+    -- Abort if player already has more of item in inventory than needed
+    if request.inventory >= request.count then return "no-crafts-needed" end
+
+    -- Calculate item need; abort if 0 (or less)
+    local crafting_yield = get_item_count_from_character_crafting_queue(character, request.name)
+    local item_need = request.count - request.inventory - crafting_yield
+    local original_need = item_need
+    if item_need <= 0 then return "no-crafts-needed" end
+
+    local crafting_recipes = game.get_filtered_recipe_prototypes{
+        {filter="has-product-item", elem_filters={{filter="name", name=request.name}}},
+        {filter="hidden-from-player-crafting", invert=true, mode="and"}
+    }
+
+    for recipe_name, recipe in pairs(crafting_recipes) do
+        local yield_per_craft = get_yield_per_craft(request.name, recipe)
+        local needed_crafts = math.ceil(item_need / yield_per_craft) --[[@as uint]]
+        local actual_crafts = character.begin_crafting{recipe=recipe_name, count=needed_crafts, silent=true}
+
+        item_need = item_need - math.floor(actual_crafts * yield_per_craft)
+        if item_need <= 0 then break end
+    end
+
+    return "attempted", original_need - item_need
 end
 
 ---Registers that a change in data tables has occured and marks the responsible player as having
