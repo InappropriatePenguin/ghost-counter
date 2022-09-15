@@ -25,3 +25,4 @@ Ghost by Andres Flores from the Noun Project
 hide by Adrien Coquet from the Noun Project  
 wave by Stephen Plaster from the Noun Project  
 cancel by Bluetip Design from the Noun Project
+Hammer by Deemak Daksina from the Noun Project
