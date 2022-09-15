@@ -348,13 +348,13 @@ function update_one_time_logistic_requests(player_index)
     end
 end
 
----Iterates over player's logistic slots and returns the first empty slot
----@param player_index number Player index
+---Iterates over player's logistic slots and returns the first empty slot. Player _must_ have a
+---character entity.
+---@param player_index uint Player index
 ---@return uint? slot_index First empty slot
 function get_first_empty_slot(player_index)
     local playerdata = get_make_playerdata(player_index)
-    local character = playerdata.luaplayer.character
-    if not character then return end
+    local character = playerdata.luaplayer.character --[[@as LuaEntity]]
 
     for slot_index = 1, character.request_slot_count + 1 do
         ---@cast slot_index uint
@@ -383,7 +383,7 @@ end
 
 ---Generates a logistic request or modifies an existing request to satisfy need. Registers the
 ---change in a `playerdata.logistic_requests` table so that it can be reverted later on.
----@param player_index number Player index
+---@param player_index uint Player index
 ---@param name string `request` name
 function make_one_time_logistic_request(player_index, name)
     -- Abort if no player character
@@ -401,6 +401,7 @@ function make_one_time_logistic_request(player_index, name)
     -- Prepare new logistic slot and get existing or first empty `slot_index`
     local new_slot = {name=request.name, min=request.count}
     local slot_index = existing_request.slot_index or get_first_empty_slot(player_index)
+    if not slot_index then return end
 
     -- Save details of change in playerdata so that it can be reverted later
     -- This is set here in order for the event handler to be able to identify this change
