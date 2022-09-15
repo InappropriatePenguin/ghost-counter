@@ -5,7 +5,7 @@ require("scripts/core")
 require("scripts/events")
 require("scripts/gui")
 
----Create playerdata table
+---Creates all necessary global tables.
 function on_init()
     ---@type table<uint, Playerdata> Table of all `playerdata` tables, indexed by `player_index`
     global.playerdata = {}
@@ -21,7 +21,7 @@ function on_init()
 end
 script.on_init(on_init)
 
----Re-setup conditional event handlers
+---Re-setups conditional event handlers.
 function on_load()
     -- Inventory/entity event handlers
     if global.events.inventory then
@@ -45,7 +45,7 @@ function on_load()
 end
 script.on_load(on_load)
 
----Validate mod data
+---Validates mod data.
 function on_configuration_changed()
     -- Validate `playerdata.job` table and contents
     for _, playerdata in pairs(global.playerdata) do
@@ -58,7 +58,7 @@ function on_configuration_changed()
 end
 script.on_configuration_changed(on_configuration_changed)
 
----Re-registers event handlers if appropriate for joining player
+---Re-registers event handlers if appropriate for joining player.
 ---@param event on_player_joined_game Event table
 function on_player_joined_game(event)
     local playerdata = get_make_playerdata(event.player_index)
@@ -70,7 +70,7 @@ function on_player_joined_game(event)
 end
 script.on_event(defines.events.on_player_joined_game, on_player_joined_game)
 
----Re-evaluates whether event handlers should continue to be bound
+---Re-evaluates whether event handlers should continue to be bound.
 ---@param event on_player_left_game Event able
 function on_player_left_game(event)
     if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
@@ -78,7 +78,7 @@ function on_player_left_game(event)
 end
 script.on_event(defines.events.on_player_left_game, on_player_left_game)
 
----Deletes playerdata table associated with removed player
+---Deletes playerdata table associated with removed player.
 ---@param event on_player_removed Event table
 function on_player_removed(event)
     global.playerdata[event.player_index] = nil
@@ -88,7 +88,7 @@ function on_player_removed(event)
 end
 script.on_event(defines.events.on_player_removed, on_player_removed)
 
----Listens to runtime settings changes
+---Listens to runtime settings changes.
 ---@param event on_runtime_mod_setting_changed Event table
 function on_runtime_mod_setting_changed(event)
     if event.setting == NAME.setting.min_update_interval then

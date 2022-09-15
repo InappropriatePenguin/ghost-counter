@@ -20,14 +20,14 @@ function get_make_playerdata(player_index)
     return playerdata
 end
 
----Returns an empty request table for the given item
+---Returns an empty request table for the given item.
 ---@param name string Item name
 ---@return Request request
 function make_empty_request(name)
     return {name=name, count=0, inventory=0, logistic_request={}}
 end
 
----Sorts a `requests` table by count, in descending order
+---Sorts a table of `Request` objects by count, in descending order.
 ---@param requests table<string, Request> Table of requests to be sorted
 ---@return Request[] requests_sorted
 function sort_requests(requests)
@@ -49,7 +49,7 @@ function sort_requests(requests)
     return requests_sorted
 end
 
----Iterates over passed entities and counts items needed to build all ghost entities and tiles
+---Iterates over passed entities and counts items needed to build all ghost entities and tiles.
 ---@param entities LuaEntity[] table of entities
 ---@param ignore_tiles boolean Determines whether ghost tiles are counted
 ---@return table<uint, LuaEntity> ghosts table of actual ghost entities/tiles
@@ -147,7 +147,7 @@ function get_blueprint_tiles(item_stack)
     end
 end
 
----Processes blueprint entities and tiles to generate item request counts
+---Processes blueprint entities and tiles to generate item request counts.
 ---@param entities table array of blueprint entities
 ---@param tiles table array of blueprint tiles
 ---@return table requests
@@ -201,7 +201,7 @@ function get_blueprint_counts(entities, tiles)
     return requests
 end
 
----Converts `job.requests` to signals out of a series of constant combinators
+---Converts a given player's `Request` table to signals out of a series of constant combinators.
 ---@param player_index uint Player index
 function make_combinators_blueprint(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -263,7 +263,7 @@ function make_combinators_blueprint(player_index)
     end
 end
 
----Deletes requests with zero ghosts from the `job.requests` table
+---Deletes requests with zero ghosts from the `job.requests` table.
 ---@param player_index uint Player index
 function remove_empty_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -272,7 +272,7 @@ function remove_empty_requests(player_index)
     end
 end
 
----Updates `job.requests` with inventory and cursor stack contents
+---Updates table of `Request`s with inventory and cursor stack contents.
 ---@param player_index uint Player index
 function update_inventory_info(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -291,7 +291,7 @@ function update_inventory_info(player_index)
     end
 end
 
----Updates the `job.requests` table with the player's current logistic requests
+---Updates table of `Request`s with the player's current logistic requests.
 ---@param player_index uint Player index
 function update_logistics_info(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -317,7 +317,7 @@ function update_logistics_info(player_index)
     end
 end
 
----Iterates over one-time requests table and restores old requests if they have been fulfilled
+---Iterates over one-time requests table and restores old requests if they have been fulfilled.
 ---@param player_index uint Player index
 function update_one_time_logistic_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -363,7 +363,7 @@ function get_first_empty_slot(player_index)
     end
 end
 
----Gets a table with details of any existing logistic request for a given item
+---Gets a table with details of any existing logistic request for a given item.
 ---@param player_index uint Player index
 ---@param name string Item name
 ---@return table|nil logistic_request
@@ -432,7 +432,7 @@ function make_one_time_logistic_request(player_index, name)
 end
 
 ---Restores the prior logistic request (if any) that was in place before the one-time request was
----made
+---made.
 ---@param player_index uint Player index
 ---@param name string Item name
 function restore_prior_logistic_request(player_index, name)
@@ -463,7 +463,7 @@ function restore_prior_logistic_request(player_index, name)
     end
 end
 
----Iterates over `playerdata.logistic_requests` to get rid of them
+---Iterates over `playerdata.logistic_requests` to get rid of them.
 ---@param player_index uint Player index
 function cancel_all_one_time_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -561,7 +561,7 @@ function craft_request(player_index, request)
 end
 
 ---Registers that a change in data tables has occured and marks the responsible player as having
----data updates to process
+---data updates to process.
 ---@param player_index uint Player index
 ---@param tick number Tick during which the data update occurred
 function register_update(player_index, tick)
@@ -577,7 +577,7 @@ function register_update(player_index, tick)
     register_nth_tick_handler(true)
 end
 
----Registers/unregisters on_nth tick event handler
+---Registers/unregisters on_nth_tick event handler.
 ---@param state any
 function register_nth_tick_handler(state)
     if state and not global.events.nth_tick then
@@ -590,7 +590,7 @@ function register_nth_tick_handler(state)
     end
 end
 
----Registers/unregisters event handlers for inventory or player cursor stack changes
+---Registers/unregisters event handlers for inventory or player cursor stack changes.
 ---@param state boolean Determines whether to register or unregister event handlers
 function register_inventory_monitoring(state)
     if state and not global.events.inventory then
@@ -610,7 +610,7 @@ function register_inventory_monitoring(state)
     end
 end
 
----Registers/unregisters event handlers for player logistic slot changes
+---Registers/unregisters event handlers for player logistic slot changes.
 ---@param state boolean Determines whether to register or unregister event handlers
 function register_logistics_monitoring(state)
     if state and not global.events.logistics then
