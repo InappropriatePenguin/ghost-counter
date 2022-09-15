@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 2022-09-14
+  Features:
+    - Added ability to manually craft requests. You can attempt to manually craft a request by shift-clicking its blue request button. You can also attempt to manually craft all requests by clicking on the new toolbar button with the hammer icon.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.9
 Date: 2022-06-20
   Bugfixes:
