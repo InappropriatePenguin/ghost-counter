@@ -18,7 +18,7 @@ data:extend{
         stack_size = 1,
         stackable = false,
         flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"},
-        icon = "__ghost-counter__/graphics/ghost-counter-tool.png",
+        icon = "__ghost-counter__/graphics/ghost-small.png",
         icon_size = 64
     }, {
         type = "shortcut",
@@ -26,8 +26,8 @@ data:extend{
         localised_name = {"shortcut.make-ghost-counter"},
         action = "spawn-item",
         icon = {
-            filename = "__ghost-counter__/graphics/shortcut-button.png",
-            priority = "medium",
+            filename = "__ghost-counter__/graphics/ghost.png",
+            priority = "extra-high",
             size = 64,
             flags = {"gui-icon"}
         },
@@ -51,64 +51,64 @@ data:extend{
         type = "sprite",
         name = NAME.sprite.get_signals_white,
         filename = "__ghost-counter__/graphics/get-signals-white.png",
-        priority = "medium",
-        size = 32,
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.get_signals_black,
         filename = "__ghost-counter__/graphics/get-signals-black.png",
-        priority = "medium",
-        size = 32,
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.hide_empty_white,
         filename = "__ghost-counter__/graphics/hide-white.png",
-        priority = "medium",
-        size = 32,
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.hide_empty_black,
         filename = "__ghost-counter__/graphics/hide-black.png",
-        priority = "medium",
-        size = 32,
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.craft_all_white,
-        filename = "__ghost-counter__/graphics/craft-all-white.png",
-        priority = "medium",
-        size = 32,
+        filename = "__ghost-counter__/graphics/craft-white.png",
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.craft_all_black,
-        filename = "__ghost-counter__/graphics/craft-all-black.png",
-        priority = "medium",
-        size = 32,
+        filename = "__ghost-counter__/graphics/craft-black.png",
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.cancel_white,
         filename = "__ghost-counter__/graphics/cancel-white.png",
-        priority = "medium",
-        size = 32,
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }, {
         type = "sprite",
         name = NAME.sprite.cancel_black,
         filename = "__ghost-counter__/graphics/cancel-black.png",
-        priority = "medium",
-        size = 32,
+        priority = "extra-high",
+        size = 64,
         flags = {"gui-icon"},
         scale = 0.5
     }
