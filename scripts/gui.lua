@@ -24,8 +24,9 @@ function Gui.toggle(player_index, state)
         }
         -- Destroy mod GUI and remove references to it
         if playerdata.gui.root and playerdata.gui.root.valid then
+            local last_location = playerdata.gui.root.location --[[@as GuiLocation.0]]
             playerdata.gui.root.destroy()
-            playerdata.gui = {}
+            playerdata.gui = {last_location=last_location}
         end
 
         -- Unbind event hooks if no no longer needed
@@ -40,6 +41,15 @@ function Gui.make_gui(player_index)
     local playerdata = get_make_playerdata(player_index)
     local screen = playerdata.luaplayer.gui.screen
     local window_loc_x, window_loc_y
+
+    -- Restore previous saved location, if any
+    if playerdata.gui.last_location then
+        local location = playerdata.gui.last_location
+        local resolution = playerdata.luaplayer.display_resolution
+
+        window_loc_x = location.x < resolution.width and location.x or nil
+        window_loc_y = location.y < resolution.height and location.y or nil
+    end
 
     -- Destory existing mod GUI if one exists
     if screen[NAME.gui.root_frame] then
