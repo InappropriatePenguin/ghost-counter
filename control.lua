@@ -59,7 +59,7 @@ end
 script.on_configuration_changed(on_configuration_changed)
 
 ---Re-registers event handlers if appropriate for joining player.
----@param event on_player_joined_game Event table
+---@param event EventData.on_player_joined_game Event table
 function on_player_joined_game(event)
     local playerdata = get_make_playerdata(event.player_index)
 
@@ -71,7 +71,7 @@ end
 script.on_event(defines.events.on_player_joined_game, on_player_joined_game)
 
 ---Re-evaluates whether event handlers should continue to be bound.
----@param event on_player_left_game Event able
+---@param event EventData.on_player_left_game Event able
 function on_player_left_game(event)
     if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
     if not is_logistics_monitoring_needed() then register_logistics_monitoring(false) end
@@ -79,7 +79,7 @@ end
 script.on_event(defines.events.on_player_left_game, on_player_left_game)
 
 ---Deletes playerdata table associated with removed player.
----@param event on_player_removed Event table
+---@param event EventData.on_player_removed Event table
 function on_player_removed(event)
     global.playerdata[event.player_index] = nil
 
@@ -89,7 +89,7 @@ end
 script.on_event(defines.events.on_player_removed, on_player_removed)
 
 ---Listens to runtime settings changes.
----@param event on_runtime_mod_setting_changed Event table
+---@param event EventData.on_runtime_mod_setting_changed Event table
 function on_runtime_mod_setting_changed(event)
     if event.setting == NAME.setting.min_update_interval then
         local new_value = settings.global[NAME.setting.min_update_interval].value --[[@as uint]]

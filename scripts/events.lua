@@ -1,5 +1,5 @@
 ---Event handler for selection using GC tool
----@param event on_player_selected_area Event table
+---@param event EventData.on_player_selected_area Event table
 ---@param ignore_tiles boolean Determines whether tiles are included in count
 function on_player_selected_area(event, ignore_tiles)
     if event.item ~= NAME.tool.ghost_counter then return end
@@ -28,14 +28,14 @@ function on_player_selected_area(event, ignore_tiles)
     end
 end
 script.on_event(defines.events.on_player_selected_area,
-    ---@param event on_player_selected_area
+    ---@param event EventData.on_player_selected_area
     function(event) on_player_selected_area(event, true) end)
     script.on_event(defines.events.on_player_alt_selected_area,
-    ---@param event on_player_selected_area
+    ---@param event EventData.on_player_selected_area
     function(event) on_player_selected_area(event, false) end)
 
 ---Handles the player using the blueprint hotkey
----@param event CustomInputEvent Event table for custom input
+---@param event EventData.CustomInputEvent Event table for custom input
 function on_player_selected_blueprint(event)
     local player_index = event.player_index
     local playerdata = get_make_playerdata(player_index)
@@ -69,7 +69,7 @@ script.on_event(NAME.input.ghost_counter_blueprint, on_player_selected_blueprint
 
 ---Updates playerdata.job.requests table as well as one-time requests to see if any can be
 ---considered fulfilled
----@param event on_player_main_inventory_changed Event table
+---@param event EventData.on_player_main_inventory_changed Event table
 function on_player_main_inventory_changed(event)
     local playerdata = get_make_playerdata(event.player_index)
     if not playerdata.is_active then return end
@@ -79,7 +79,7 @@ function on_player_main_inventory_changed(event)
 end
 
 ---Updates one-time logistic requests table as well as job.requests
----@param event on_entity_logistic_slot_changed Event table
+---@param event EventData.on_entity_logistic_slot_changed Event table
 function on_entity_logistic_slot_changed(event)
     -- Exit if event does not involve a player character
     if event.entity.type ~= "character" then return end
@@ -107,7 +107,7 @@ function on_entity_logistic_slot_changed(event)
 end
 
 ---Triggers an update if the player respawns.
----@param event on_player_respawned Event data
+---@param event EventData.on_player_respawned Event data
 function on_player_respawned(event)
     local playerdata = get_make_playerdata(event.player_index)
     if not playerdata.is_active then return end
@@ -116,7 +116,7 @@ end
 script.on_event(defines.events.on_player_respawned, on_player_respawned)
 
 ---Triggers an update if the player dies.
----@param event on_player_died Event data
+---@param event EventData.on_player_died Event data
 function on_player_died(event)
     local playerdata = get_make_playerdata(event.player_index)
     if not playerdata.is_active then return end
@@ -126,7 +126,7 @@ script.on_event(defines.events.on_player_died, on_player_died)
 
 ---Handles `on_entity_destroyed` by looking up `event.unit_number` in ghost tables and updates
 ---requests tables where appropriate
----@param event on_entity_destroyed Event table
+---@param event EventData.on_entity_destroyed Event table
 function on_ghost_destroyed(event)
     -- Since even ghost tiles have `unit_number`, exit if none is provided
     if not event.unit_number then return end
