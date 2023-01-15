@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+.luarc.json
 .sublime-project*
 .modportal
 .assets
