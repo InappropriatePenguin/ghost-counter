@@ -24,14 +24,13 @@ data:extend{
         type = "shortcut",
         name = NAME.shortcut.button,
         localised_name = {"shortcut.make-ghost-counter"},
-        action = "spawn-item",
+        action = "lua",
         icon = {
             filename = "__ghost-counter__/graphics/ghost.png",
             priority = "extra-high",
             size = 64,
             flags = {"gui-icon"}
         },
-        item_to_spawn = NAME.tool.ghost_counter,
         associated_control_input = NAME.input.ghost_counter_selection,
         style = "blue"
     }, {
@@ -39,13 +38,6 @@ data:extend{
         name = NAME.input.ghost_counter_selection,
         key_sequence = "ALT + G",
         order = "a",
-        action = "spawn-item",
-        item_to_spawn = NAME.tool.ghost_counter
-    }, {
-        type = "custom-input",
-        name = NAME.input.ghost_counter_blueprint,
-        key_sequence = "CONTROL + G",
-        order = "b",
         action = "lua"
     }, {
         type = "sprite",

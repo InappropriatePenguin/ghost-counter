@@ -1,3 +1,5 @@
+  Changes:
+    - Consolidated both shortcuts into one (Alt + G by default), which will spawn the ghost counter selection tool when clicked, and use blueprint contents if the player is holding a blueprint in their cursor. The toolbar button will function similarly.
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 2022-09-14

@@ -25,8 +25,7 @@ local NAME = {
         scroll_pane = mod_prefix .. "scroll-pane"
     },
     input = {
-        ghost_counter_selection = mod_prefix .. "selection-hotkey",
-        ghost_counter_blueprint = mod_prefix .. "blueprint-hotkey"
+        ghost_counter_selection = mod_prefix .. "selection-hotkey"
     },
     style = {
         root_frame = mod_prefix .. "root-frame",

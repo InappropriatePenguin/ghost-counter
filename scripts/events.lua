@@ -1,3 +1,27 @@
+---Handles the lua shortcut button or hotkey being triggered.
+---@param event EventData.on_lua_shortcut|EventData.CustomInputEvent Event table
+function on_lua_shortcut(event)
+    -- Exclude irrelevant lua shortcuts
+    if event.prototype_name and event.prototype_name ~= NAME.shortcut.button then return end
+
+    local player = game.get_player(event.player_index) --[[@as LuaPlayer]]
+    local cursor_stack = player.cursor_stack
+
+    -- Abort if player has no cursor stack as they are presumably a spectator
+    if not cursor_stack then return end
+
+    if player.is_cursor_blueprint() then
+        on_player_selected_blueprint(event)
+    else
+        local clear_cursor = player.clear_cursor()
+        if clear_cursor then
+            cursor_stack.set_stack({name=NAME.tool.ghost_counter})
+        end
+    end
+end
+script.on_event(defines.events.on_lua_shortcut, on_lua_shortcut)
+script.on_event(NAME.input.ghost_counter_selection, on_lua_shortcut)
+
 ---Event handler for selection using GC tool
 ---@param event EventData.on_player_selected_area Event table
 ---@param ignore_tiles boolean Determines whether tiles are included in count
@@ -34,8 +58,8 @@ script.on_event(defines.events.on_player_selected_area,
     ---@param event EventData.on_player_selected_area
     function(event) on_player_selected_area(event, false) end)
 
----Handles the player using the blueprint hotkey
----@param event EventData.CustomInputEvent Event table for custom input
+---Handles Ghost counter being activated with a blueprint in cursor.
+---@param event EventData.on_lua_shortcut|EventData.CustomInputEvent Event table
 function on_player_selected_blueprint(event)
     local player_index = event.player_index
     local playerdata = get_make_playerdata(player_index)
@@ -65,7 +89,6 @@ function on_player_selected_blueprint(event)
 
     Gui.toggle(player_index, true)
 end
-script.on_event(NAME.input.ghost_counter_blueprint, on_player_selected_blueprint)
 
 ---Updates playerdata.job.requests table as well as one-time requests to see if any can be
 ---considered fulfilled
