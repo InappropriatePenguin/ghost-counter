@@ -1,3 +1,6 @@
+  Locale:
+    - Added Russian translation, thanks to MikdadAgasiev.
+
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.1
 Date: 2023-01-15
