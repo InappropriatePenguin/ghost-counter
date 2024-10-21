@@ -8,23 +8,23 @@ require("scripts/gui")
 ---Creates all necessary global tables.
 function on_init()
     ---@type table<uint, Playerdata> Table of all `playerdata` tables, indexed by `player_index`
-    global.playerdata = {}
+    storage.playerdata = {}
 
     ---@type uint Last game tick where an event updated mod data
-    global.last_event = 0
+    storage.last_event = 0
 
     ---@type {min_update_interval: uint} Map settings table
-    global.settings = {min_update_interval=settings.global[NAME.setting.min_update_interval].value --[[@as uint]]}
+    storage.settings = {min_update_interval=settings.global[NAME.setting.min_update_interval].value --[[@as uint]]}
 
     ---@type table<string, boolean> Contains registration status of different event handler groups
-    global.events = {inventory=false, logistics=false, nth_tick=false}
+    storage.events = {inventory=false, logistics=false, nth_tick=false}
 end
 script.on_init(on_init)
 
 ---Re-setups conditional event handlers.
 function on_load()
     -- Inventory/entity event handlers
-    if global.events.inventory then
+    if storage.events.inventory then
         script.on_event(defines.events.on_player_main_inventory_changed,
             on_player_main_inventory_changed)
         script.on_event(defines.events.on_player_cursor_stack_changed,
@@ -33,14 +33,14 @@ function on_load()
     end
 
     -- Logistics event handler
-    if global.events.logistics then
+    if storage.events.logistics then
         script.on_event(defines.events.on_entity_logistic_slot_changed,
             on_entity_logistic_slot_changed)
     end
 
     -- nth_tick event handler
-    if global.events.nth_tick then
-        script.on_nth_tick(global.settings.min_update_interval, on_nth_tick)
+    if storage.events.nth_tick then
+        script.on_nth_tick(storage.settings.min_update_interval, on_nth_tick)
     end
 end
 script.on_load(on_load)
@@ -48,7 +48,7 @@ script.on_load(on_load)
 ---Validates mod data.
 function on_configuration_changed()
     -- Validate `playerdata.job` table and contents
-    for _, playerdata in pairs(global.playerdata) do
+    for _, playerdata in pairs(storage.playerdata) do
         playerdata.job = playerdata.job or {}
         playerdata.job.area = playerdata.job.area or {}
         playerdata.job.ghosts = playerdata.job.ghosts or {}
@@ -81,7 +81,7 @@ script.on_event(defines.events.on_player_left_game, on_player_left_game)
 ---Deletes playerdata table associated with removed player.
 ---@param event EventData.on_player_removed Event table
 function on_player_removed(event)
-    global.playerdata[event.player_index] = nil
+    storage.playerdata[event.player_index] = nil
 
     if not is_inventory_monitoring_needed() then register_inventory_monitoring(false) end
     if not is_logistics_monitoring_needed() then register_logistics_monitoring(false) end
@@ -95,13 +95,13 @@ function on_runtime_mod_setting_changed(event)
         local new_value = settings.global[NAME.setting.min_update_interval].value --[[@as uint]]
 
         -- Reregister on_nth_tick event handler using the new minimum interval
-        if global.events.nth_tick then
+        if storage.events.nth_tick then
             ---@diagnostic disable-next-line
             script.on_nth_tick(nil)
             script.on_nth_tick(new_value, on_nth_tick)
         end
 
-        global.settings.min_update_interval = new_value
+        storage.settings.min_update_interval = new_value
     end
 end
 script.on_event(defines.events.on_runtime_mod_setting_changed, on_runtime_mod_setting_changed)

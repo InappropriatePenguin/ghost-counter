@@ -155,7 +155,7 @@ function on_ghost_destroyed(event)
     if not event.unit_number then return end
 
     -- Iterate over each player, and update their requests if they were tracking the entity
-    for player_index, playerdata in pairs(global.playerdata) do
+    for player_index, playerdata in pairs(storage.playerdata) do
         if playerdata.is_active and playerdata.job.ghosts[event.unit_number] then
             local items = playerdata.job.ghosts[event.unit_number]
             for _, item in pairs(items) do
@@ -172,13 +172,13 @@ end
 ---@param event table Event table
 function on_nth_tick(event)
     -- If no data updates happened over the last 5 ticks, unregister nth_tick handler and exit
-    if event.tick - global.last_event > global.settings.min_update_interval then
+    if event.tick - storage.last_event > storage.settings.min_update_interval then
         register_nth_tick_handler(false)
         return
     end
 
     -- Iterate over each player and process their data if they had updates
-    for player_index, playerdata in pairs(global.playerdata) do
+    for player_index, playerdata in pairs(storage.playerdata) do
         -- If a player had registered data updates, reprocess their data
         if playerdata.has_updates then
             update_one_time_logistic_requests(player_index)

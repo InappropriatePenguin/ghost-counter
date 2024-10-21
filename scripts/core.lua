@@ -2,7 +2,7 @@
 ---@param player_index uint LuaPlayer index
 ---@return Playerdata playerdata
 function get_make_playerdata(player_index)
-    local playerdata = global.playerdata[player_index]
+    local playerdata = storage.playerdata[player_index]
 
     if not playerdata then
         playerdata = {
@@ -14,7 +14,7 @@ function get_make_playerdata(player_index)
             gui={},
             options={}
         }
-        global.playerdata[player_index] = playerdata
+        storage.playerdata[player_index] = playerdata
     end
 
     return playerdata
@@ -571,7 +571,7 @@ function register_update(player_index, tick)
     playerdata.has_updates = true
 
     -- Record the tick in which the update was registered
-    global.last_event = tick
+    storage.last_event = tick
 
     -- Register nth_tick handler if needed
     register_nth_tick_handler(true)
@@ -580,11 +580,11 @@ end
 ---Registers/unregisters on_nth_tick event handler.
 ---@param state any
 function register_nth_tick_handler(state)
-    if state and not global.events.nth_tick then
-        global.events.nth_tick = true
-        script.on_nth_tick(global.settings.min_update_interval, on_nth_tick)
-    elseif state == false and global.events.nth_tick then
-        global.events.nth_tick = false
+    if state and not storage.events.nth_tick then
+        storage.events.nth_tick = true
+        script.on_nth_tick(storage.settings.min_update_interval, on_nth_tick)
+    elseif state == false and storage.events.nth_tick then
+        storage.events.nth_tick = false
         ---@diagnostic disable-next-line
         script.on_nth_tick(nil)
     end
@@ -593,16 +593,16 @@ end
 ---Registers/unregisters event handlers for inventory or player cursor stack changes.
 ---@param state boolean Determines whether to register or unregister event handlers
 function register_inventory_monitoring(state)
-    if state and not global.events.inventory then
-        global.events.inventory = true
+    if state and not storage.events.inventory then
+        storage.events.inventory = true
 
         script.on_event(defines.events.on_player_main_inventory_changed,
             on_player_main_inventory_changed)
         script.on_event(defines.events.on_player_cursor_stack_changed,
             on_player_main_inventory_changed)
         script.on_event(defines.events.on_entity_destroyed, on_ghost_destroyed)
-    elseif state == false and global.events.inventory then
-        global.events.inventory = false
+    elseif state == false and storage.events.inventory then
+        storage.events.inventory = false
 
         script.on_event(defines.events.on_player_main_inventory_changed, nil)
         script.on_event(defines.events.on_player_cursor_stack_changed, nil)
@@ -613,12 +613,12 @@ end
 ---Registers/unregisters event handlers for player logistic slot changes.
 ---@param state boolean Determines whether to register or unregister event handlers
 function register_logistics_monitoring(state)
-    if state and not global.events.logistics then
-        global.events.logistics = true
+    if state and not storage.events.logistics then
+        storage.events.logistics = true
         script.on_event(defines.events.on_entity_logistic_slot_changed,
             on_entity_logistic_slot_changed)
-    elseif state == false and global.events.logistics then
-        global.events.logistics = false
+    elseif state == false and storage.events.logistics then
+        storage.events.logistics = false
         script.on_event(defines.events.on_entity_logistic_slot_changed, nil)
     end
 end
@@ -627,7 +627,7 @@ end
 ---mod GUI open.
 ---@return boolean
 function is_inventory_monitoring_needed()
-    for _, playerdata in pairs(global.playerdata) do
+    for _, playerdata in pairs(storage.playerdata) do
         if playerdata.is_active and playerdata.luaplayer.connected then return true end
     end
     return false
@@ -637,7 +637,7 @@ end
 ---are still unfulfilled.
 ---@return boolean
 function is_logistics_monitoring_needed()
-    for _, playerdata in pairs(global.playerdata) do
+    for _, playerdata in pairs(storage.playerdata) do
         if (playerdata.is_active or table_size(playerdata.logistic_requests) > 0) and
             playerdata.luaplayer.connected then return true end
     end
