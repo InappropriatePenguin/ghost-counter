@@ -7,17 +7,22 @@ data:extend{
         type = "selection-tool",
         name = NAME.tool.ghost_counter,
         subgroup = "tool",
-        selection_color = {57, 156, 251},
-        alt_selection_color = {0, 89, 132},
-        selection_mode = {"any-entity", "same-force"},
-        alt_selection_mode = {"any-entity", "same-force"},
-        selection_count_button_color = {43, 113, 180},
-        alt_selection_count_button_color = {43, 113, 180},
-        selection_cursor_box_type = "copy",
-        alt_selection_cursor_box_type = "copy",
+        select = {
+            mode = {"any-entity", "same-force"},
+            cursor_box_type = "copy",
+            border_color = {57, 156, 251},
+            count_button_color = {43, 113, 180},
+        },
+        alt_select = {
+            mode = {"any-entity", "same-force"},
+            cursor_box_type = "copy",
+            border_color = {0, 89, 132},
+            count_button_color = {43, 113, 180}
+        },
         stack_size = 1,
         stackable = false,
-        flags = {"hidden", "only-in-cursor", "not-stackable", "spawnable"},
+        hidden = true,
+        flags = {"only-in-cursor", "not-stackable", "spawnable"},
         icon = "__ghost-counter__/graphics/ghost-small.png",
         icon_size = 64
     }, {
@@ -25,12 +30,8 @@ data:extend{
         name = NAME.shortcut.button,
         localised_name = {"shortcut.make-ghost-counter"},
         action = "lua",
-        icon = {
-            filename = "__ghost-counter__/graphics/ghost.png",
-            priority = "extra-high",
-            size = 64,
-            flags = {"gui-icon"}
-        },
+        icon = "__ghost-counter__/graphics/ghost.png",
+        small_icon = "__ghost-counter__/graphics/ghost.png",
         associated_control_input = NAME.input.ghost_counter_selection,
         style = "blue"
     }, {
