@@ -96,7 +96,7 @@ function get_selection_counts(entities, ignore_tiles)
                 end
             end
 
-            script.register_on_entity_destroyed(entity)
+            script.register_on_object_destroyed(entity)
         elseif entity_type == "item-request-proxy" then
             local unit_number = entity.unit_number --[[@as uint]]
             ghosts[unit_number] = {}
@@ -105,7 +105,7 @@ function get_selection_counts(entities, ignore_tiles)
                 requests[name].count = requests[name].count + val
                 insert(ghosts[unit_number], {name=name, count=val})
             end
-            script.register_on_entity_destroyed(entity)
+            script.register_on_object_destroyed(entity)
         elseif entity.to_be_upgraded() then
             local unit_number = entity.unit_number --[[@as uint]]
             local prototype = entity.get_upgrade_target() --[[@as LuaEntityPrototype]]
@@ -128,7 +128,7 @@ function get_selection_counts(entities, ignore_tiles)
                 insert(ghosts[unit_number], item)
             end
 
-            script.register_on_entity_destroyed(entity)
+            script.register_on_object_destroyed(entity)
         end
     end
 
