@@ -69,8 +69,8 @@ function get_selection_counts(entities, ignore_tiles)
             -- Get item to place entity, from prototype if necessary
             if not cache[ghost_name] then
                 local prototype = entity_type == "entity-ghost" and
-                                    game.entity_prototypes[ghost_name] or
-                                    game.tile_prototypes[ghost_name]
+                                    prototypes.entity[ghost_name] or
+                                    prototypes.tile[ghost_name]
                 cache[ghost_name] = {
                     item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
                 }
@@ -158,7 +158,7 @@ function get_blueprint_counts(entities, tiles)
     -- Iterate over blueprint entities
     for _, entity in pairs(entities) do
         if not cache[entity.name] then
-            local prototype = game.entity_prototypes[entity.name]
+            local prototype = prototypes.entity[entity.name]
             cache[entity.name] = {
                 item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
             }
@@ -184,7 +184,7 @@ function get_blueprint_counts(entities, tiles)
     -- Iterate over blueprint tiles
     for _, tile in pairs(tiles) do
         if not cache[tile.name] then
-            local prototype = game.tile_prototypes[tile.name]
+            local prototype = prototypes.tile[tile.name]
             cache[tile.name] = {
                 item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
             }
@@ -207,7 +207,7 @@ function make_combinators_blueprint(player_index)
     local playerdata = get_make_playerdata(player_index)
 
     -- Make sure constant combinator prototype exists
-    local prototype = game.entity_prototypes["constant-combinator"]
+    local prototype = prototypes.entity["constant-combinator"]
     if not prototype then
         playerdata.luaplayer.print({"ghost-counter-message.missing-constant-combinator-prototype"})
         return
@@ -499,7 +499,7 @@ end
 function get_item_count_from_character_crafting_queue(character, item_name)
     if character.crafting_queue_size == 0 then return 0 end
 
-    local relevant_recipes = game.get_filtered_recipe_prototypes{
+    local relevant_recipes = prototypes.get_recipe_filtered{
         {filter="has-product-item", elem_filters={{filter="name", name=item_name}}},
         {filter="hidden-from-player-crafting", invert=true, mode="and"}
     }
@@ -543,7 +543,7 @@ function craft_request(player_index, request)
     local original_need = item_need
     if item_need <= 0 then return "no-crafts-needed" end
 
-    local crafting_recipes = game.get_filtered_recipe_prototypes{
+    local crafting_recipes = prototypes.get_recipe_filtered{
         {filter="has-product-item", elem_filters={{filter="name", name=request.name}}},
         {filter="hidden-from-player-crafting", invert=true, mode="and"}
     }

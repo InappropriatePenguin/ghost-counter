@@ -285,7 +285,7 @@ function Gui.make_row(player_index, request)
     local playerdata = get_make_playerdata(player_index)
     local parent = playerdata.gui.requests_container
 
-    local localized_name = game.item_prototypes[request.name].localised_name
+    local localized_name = prototypes.item[request.name].localised_name
 
     -- Row frame
     local frame = parent.add{type="frame", direction="horizontal", style=NAME.style.row_frame}
