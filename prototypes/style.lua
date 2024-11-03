@@ -1,7 +1,7 @@
 local NAME = require("shared/constants")
 local guistyle = data.raw["gui-style"]["default"]
 
-guistyle[NAME.style.root_frame] = {type="frame_style", width=422}
+guistyle[NAME.style.root_frame] = {type="frame_style", width=450}
 
 guistyle[NAME.style.titlebar_flow] = {type="horizontal_flow_style", horizontal_spacing=6}
 
@@ -112,6 +112,7 @@ guistyle[NAME.style.ghost_number_label] = {type="label_style", width=40, horizon
 guistyle[NAME.style.ghost_sprite] = {type="image_style", width=20, height=20}
 
 guistyle[NAME.style.ghost_name_label] = {type="label_style", width=180}
+guistyle[NAME.style.ghost_name_wide_label] = {type="label_style", width=208}
 
 guistyle[NAME.style.inventory_number_label] = {
     type = "label_style",

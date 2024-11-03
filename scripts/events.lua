@@ -35,12 +35,10 @@ function on_player_selected_area(event, ignore_tiles)
         local player_index = event.player_index
         local playerdata = get_make_playerdata(player_index)
 
-        playerdata.job = {
-            area=event.area,
-            ghosts=ghosts,
-            requests=requests,
-            requests_sorted=sort_requests(requests)
-        }
+        playerdata.job.area = event.area
+        playerdata.job.ghosts = ghosts
+        playerdata.job.requests = requests
+        playerdata.job.requests_sorted = sort_requests(requests)
 
         update_one_time_logistic_requests(player_index)
         update_inventory_info(player_index)
@@ -63,11 +61,13 @@ script.on_event(defines.events.on_player_selected_area,
 function on_player_selected_blueprint(event)
     local player_index = event.player_index
     local playerdata = get_make_playerdata(player_index)
-    local entities = playerdata.luaplayer.get_blueprint_entities() or {}
+    -- local entities = playerdata.luaplayer.get_blueprint_entities() or {}
+    local entities
 
     local tiles = {}
     if (playerdata.luaplayer.is_cursor_blueprint() and
         playerdata.luaplayer.cursor_stack.valid_for_read) then
+        entities = playerdata.luaplayer.cursor_stack.get_blueprint_entities()
         tiles = get_blueprint_tiles(playerdata.luaplayer.cursor_stack)
     end
 
@@ -95,13 +95,13 @@ end
 ---@param event EventData.on_player_main_inventory_changed Event table
 function on_player_main_inventory_changed(event)
     local playerdata = get_make_playerdata(event.player_index)
-    if not playerdata.is_active then return end
+    if not playerdata.is_active and not next(playerdata.logistic_requests) then return end
     if playerdata.luaplayer.controller_type ~= defines.controllers.character then return end
 
     register_update(playerdata.index, event.tick)
 end
 
----Updates one-time logistic requests table as well as job.requests
+---Updates one-time logistic requests table as well as `job.requests`
 ---@param event EventData.on_entity_logistic_slot_changed Event table
 function on_entity_logistic_slot_changed(event)
     -- Exit if event does not involve a player character
@@ -113,16 +113,20 @@ function on_entity_logistic_slot_changed(event)
     local player_index = player.index
     local playerdata = get_make_playerdata(player_index)
 
-    -- Iterate over known one-time logistic requests to see if the event concerns any of them
-    for name, request in pairs(playerdata.logistic_requests) do
-        if request.slot_index == event.slot_index then
-            if request.is_new then
-                request.is_new = false
-                return
-            else
-                playerdata.logistic_requests[name] = nil
+    local character = playerdata.luaplayer.character
+    if not character then return end
+
+    -- Dissociates logistic section slot from mod request if manually modified 
+    if event.section.group == get_logistic_section_name(player_index) then
+        for name_and_quality, request in pairs(playerdata.logistic_requests) do
+            if request.slot_index == event.slot_index then
+                if request.is_new then
+                    request.is_new = false
+                    return
+                else
+                    playerdata.logistic_requests[name_and_quality] = nil
+                end
             end
-            break
         end
     end
 
@@ -147,19 +151,19 @@ function on_player_died(event)
 end
 script.on_event(defines.events.on_player_died, on_player_died)
 
----Handles `on_entity_destroyed` by looking up `event.unit_number` in ghost tables and updates
+---Handles `on_object_destroyed` by looking up `event.useful_id` in ghost tables and updates
 ---requests tables where appropriate
----@param event EventData.on_entity_destroyed Event table
+---@param event EventData.on_object_destroyed Event table
 function on_ghost_destroyed(event)
     -- Since even ghost tiles have `unit_number`, exit if none is provided
-    if not event.unit_number then return end
+    if not event.useful_id then return end
 
     -- Iterate over each player, and update their requests if they were tracking the entity
     for player_index, playerdata in pairs(storage.playerdata) do
-        if playerdata.is_active and playerdata.job.ghosts[event.unit_number] then
-            local items = playerdata.job.ghosts[event.unit_number]
+        if playerdata.is_active and playerdata.job.ghosts[event.useful_id] then
+            local items = playerdata.job.ghosts[event.useful_id]
             for _, item in pairs(items) do
-                local request = playerdata.job.requests[item.name]
+                local request = playerdata.job.requests[item.name .. "+" .. item.quality]
                 request.count = request.count - item.count
             end
             register_update(player_index, event.tick)
@@ -181,12 +185,11 @@ function on_nth_tick(event)
     for player_index, playerdata in pairs(storage.playerdata) do
         -- If a player had registered data updates, reprocess their data
         if playerdata.has_updates then
+            update_inventory_info(player_index)
+            update_logistics_info(player_index)
             update_one_time_logistic_requests(player_index)
 
             if playerdata.is_active then
-                update_inventory_info(player_index)
-                update_logistics_info(player_index)
-
                 Gui.update_list(player_index)
             end
 

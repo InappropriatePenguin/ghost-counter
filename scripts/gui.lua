@@ -16,12 +16,12 @@ function Gui.toggle(player_index, state)
         register_logistics_monitoring(true)
     else
         playerdata.is_active = false
-        playerdata.job = {
-            area={},
-            ghosts={},
-            requests={},
-            requests_sorted={}
-        }
+
+        playerdata.job.area = {}
+        playerdata.job.ghosts = {}
+        playerdata.job.requests = {}
+        playerdata.job.requests_sorted = {}
+
         -- Destroy mod GUI and remove references to it
         if playerdata.gui.root and playerdata.gui.root.valid then
             local last_location = playerdata.gui.root.location --[[@as GuiLocation.0]]
@@ -97,16 +97,16 @@ function Gui.make_gui(player_index)
         name=NAME.gui.hide_empty_button,
         tooltip={"ghost-counter-gui.hide-empty-requests-tooltip"},
         sprite=hide_empty and NAME.sprite.hide_empty_black or NAME.sprite.hide_empty_white,
-        hovered_sprite=NAME.sprite.hide_empty_black,
-        clicked_sprite=hide_empty and NAME.sprite.hide_empty_white or NAME.sprite.hide_empty_black,
+        -- hovered_sprite=NAME.sprite.hide_empty_black,
+        -- clicked_sprite=hide_empty and NAME.sprite.hide_empty_white or NAME.sprite.hide_empty_black,
         style=hide_empty and NAME.style.titlebar_button_active or NAME.style.titlebar_button
     }
     titlebar_flow.add{
         type="sprite-button",
         name=NAME.gui.close_button,
-        sprite="utility/close_white",
-        hovered_sprite="utility/close_black",
-        clicked_sprite="utility/close_black",
+        sprite="utility/close",
+        -- hovered_sprite="utility/close_black",
+        -- clicked_sprite="utility/close_black",
         tooltip={"ghost-counter-gui.close-button-tooltip"},
         style="close_button"
     }
@@ -175,10 +175,12 @@ end
 function Gui.make_list(player_index)
     local playerdata = get_make_playerdata(player_index)
 
+    local quality_feature = script.feature_flags.quality
+
     -- Create a new row frame for each request
     playerdata.gui.requests = {}
     for _, request in pairs(playerdata.job.requests_sorted) do
-        Gui.make_row(player_index, request)
+        Gui.make_row(player_index, request, quality_feature)
     end
 end
 
@@ -189,19 +191,18 @@ end
 ---@return string style Style that should be applied to the button
 ---@return LocalisedString tooltip Tooltip shown for button
 function make_request_button_properties(request, one_time_request)
-    local logistic_request = request.logistic_request or {}
+    local requested = request.requested or 0
 
-    local enabled = ((logistic_request.min or 0) < request.count) or one_time_request and true or
-                        false
+    local enabled = (requested < request.count) or one_time_request and true or false
     local style =
-        ((logistic_request.min or 0) < request.count) and NAME.style.ghost_request_button or
+        (requested < request.count) and NAME.style.ghost_request_button or
             NAME.style.ghost_request_active_button
 
     local str = "[item=" .. request.name .. "] "
 
     local tooltip
     if enabled then
-        tooltip = ((logistic_request.min or 0) < request.count) and
+        tooltip = (requested < request.count) and
             {"ghost-counter-gui.set-temporary-request-tooltip", request.count, str} or
             {"ghost-counter-gui.unset-temporary-request-tooltip"}
     else
@@ -217,11 +218,13 @@ function Gui.update_list(player_index)
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.is_active or not playerdata.gui.requests then return end
 
-    local indices = {count=1, sprite=2, label=3, inventory=4, request=5}
+    local indices = script.feature_flags.quality and
+        {count=1, sprite=2, quality=3, label=4, inventory=5, request=6} or
+        {count=1, sprite=2, label=3, inventory=4, request=5}
 
     -- Update gui elements with new values
-    for name, frame in pairs(playerdata.gui.requests) do
-        local request = playerdata.job.requests[name]
+    for name_and_quality, frame in pairs(playerdata.gui.requests) do
+        local request = playerdata.job.requests[name_and_quality]
 
         if request.count > 0 or not playerdata.options.hide_empty_requests then
             frame.visible = true
@@ -238,7 +241,7 @@ function Gui.update_list(player_index)
             local request_element = frame.children[indices.request]
             if diff > 0 then
                 local enabled, style, tooltip = make_request_button_properties(request,
-                                           playerdata.logistic_requests[request.name])
+                                           playerdata.logistic_requests[name_and_quality])
 
                 if request_element.type == "button" then
                     request_element.enabled = enabled
@@ -253,7 +256,7 @@ function Gui.update_list(player_index)
                         enabled=enabled,
                         style=style,
                         tooltip=tooltip,
-                        tags={ghost_counter_request=request.name}
+                        tags={ghost_counter_request=request.name, ghost_counter_quality=request.quality}
                     }
                 end
                 -- Otherwise create request-fulfilled checkmark previous element was a request button
@@ -281,15 +284,17 @@ end
 ---Generates the row frame for a given request table
 ---@param player_index uint Player index
 ---@param request table `request` table, containing name, count, inventory, etc.
-function Gui.make_row(player_index, request)
+---@param quality_feature boolean Whether or not quality is enabled
+function Gui.make_row(player_index, request, quality_feature)
     local playerdata = get_make_playerdata(player_index)
     local parent = playerdata.gui.requests_container
 
     local localized_name = prototypes.item[request.name].localised_name
+    local name_and_quality = request.name .. "+" .. request.quality
 
     -- Row frame
     local frame = parent.add{type="frame", direction="horizontal", style=NAME.style.row_frame}
-    playerdata.gui.requests[request.name] = frame
+    playerdata.gui.requests[name_and_quality] = frame
 
     -- Ghost (item) count
     frame.add{type="label", caption=request.count, style=NAME.style.ghost_number_label}
@@ -302,8 +307,23 @@ function Gui.make_row(player_index, request)
         style=NAME.style.ghost_sprite
     }
 
+    -- Quality sprite
+    if quality_feature then
+        frame.add{
+            type="sprite",
+            sprite="quality/" .. request.quality,
+            tooltip={"quality-name." .. request.quality},
+            resize_to_sprite=false,
+            style=NAME.style.ghost_sprite
+        }
+    end
+
     -- Item or tile localized name
-    frame.add{type="label", caption=localized_name, style=NAME.style.ghost_name_label}
+    frame.add{
+        type="label",
+        caption=localized_name,
+        style=quality_feature and NAME.style.ghost_name_label or NAME.style.ghost_name_wide_label
+    }
 
     -- Amount in inventory
     frame.add{type="label", caption=request.inventory, style=NAME.style.inventory_number_label}
@@ -314,7 +334,7 @@ function Gui.make_row(player_index, request)
     -- Show one-time request logistic button
     if diff > 0 then
         local enabled, style, tooltip = make_request_button_properties(request,
-                                   playerdata.logistic_requests[request.name])
+                                   playerdata.logistic_requests[name_and_quality])
 
         frame.add{
             type="button",
@@ -322,7 +342,7 @@ function Gui.make_row(player_index, request)
             enabled=enabled,
             style=style,
             tooltip=tooltip,
-            tags={ghost_counter_request=request.name}
+            tags={ghost_counter_request=request.name, ghost_counter_quality=request.quality}
         }
     else -- Show request fulfilled sprite
         local sprite_container = frame.add{
@@ -356,7 +376,7 @@ function Gui.on_gui_click(event)
     elseif element.tags and element.tags.ghost_counter_request then
         -- One-time logistic request/craft button
         local playerdata = get_make_playerdata(player_index)
-        local request_name = element.tags.ghost_counter_request --[[@as string]]
+        local request_name = element.tags.ghost_counter_request .. "+" .. element.tags.ghost_counter_quality --[[@as string]]
         if event.shift == true then
             local request = playerdata.job.requests[request_name]
             if request then
@@ -372,6 +392,11 @@ function Gui.on_gui_click(event)
                         text={"ghost-counter-message.crafts-attempted-none"},
                         create_at_cursor=true
                     }
+                elseif result == "cannot-craft-quality" then
+                    player.create_local_flying_text{
+                        text={"ghost-counter-message.crafts-attempted-quality"},
+                        create_at_cursor=true
+                    }
                 end
             end
         else
@@ -379,8 +404,10 @@ function Gui.on_gui_click(event)
                 make_one_time_logistic_request(player_index, request_name)
                 Gui.update_list(player_index)
             else
-                restore_prior_logistic_request(player_index, request_name)
+                clear_one_time_request(player_index, request_name)
                 Gui.update_list(player_index)
+                -- restore_prior_logistic_request(player_index, request_name)
+                -- Gui.update_list(player_index)
             end
         end
     elseif element_name == NAME.gui.hide_empty_button then
@@ -396,7 +423,7 @@ function Gui.on_gui_click(event)
 
         Gui.update_list(player_index)
     elseif element_name == NAME.gui.get_signals_button then
-        make_combinators_blueprint(event.player_index)
+        make_combinator_blueprint(event.player_index)
     elseif element_name == NAME.gui.craft_all_button then
         local playerdata = get_make_playerdata(player_index)
         for _, request in pairs(playerdata.job.requests) do
@@ -404,9 +431,9 @@ function Gui.on_gui_click(event)
         end
     elseif element_name == NAME.gui.request_all_button then
         local playerdata = get_make_playerdata(player_index)
-        for _, request in pairs(playerdata.job.requests) do
-            if request.count > 0 and not playerdata.logistic_requests[request.name] then
-                make_one_time_logistic_request(player_index, request.name)
+        for name_and_quality, request in pairs(playerdata.job.requests) do
+            if request.count > 0 and not playerdata.logistic_requests[name_and_quality] then
+                make_one_time_logistic_request(player_index, name_and_quality)
             end
         end
 

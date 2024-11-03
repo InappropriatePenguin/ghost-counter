@@ -20,7 +20,6 @@ data:extend{
             count_button_color = {43, 113, 180}
         },
         stack_size = 1,
-        stackable = false,
         hidden = true,
         flags = {"only-in-cursor", "not-stackable", "spawnable"},
         icon = "__ghost-counter__/graphics/ghost-small.png",

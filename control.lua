@@ -29,7 +29,7 @@ function on_load()
             on_player_main_inventory_changed)
         script.on_event(defines.events.on_player_cursor_stack_changed,
             on_player_main_inventory_changed)
-        script.on_event(defines.events.on_entity_destroyed, on_ghost_destroyed)
+        script.on_event(defines.events.on_object_destroyed, on_ghost_destroyed)
     end
 
     -- Logistics event handler

@@ -44,6 +44,7 @@ local NAME = {
         ghost_number_label = mod_prefix .. "ghost-number-label",
         ghost_sprite = mod_prefix .. "ghost-sprite",
         ghost_name_label = mod_prefix .. "ghost-name-label",
+        ghost_name_wide_label = mod_prefix .. "ghost-name-wide-label",
         inventory_number_label = mod_prefix .. "inventory-number-label",
         ghost_request_button = mod_prefix .. "ghost-request-button",
         ghost_request_active_button = mod_prefix .. "ghost-request-active-button",

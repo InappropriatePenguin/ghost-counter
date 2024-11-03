@@ -9,7 +9,12 @@ function get_make_playerdata(player_index)
             luaplayer=game.players[player_index],
             index=player_index,
             is_active=false,
-            job={},
+            job={
+                area={},
+                ghosts={},
+                requests={},
+                requests_sorted={}
+            },
             logistic_requests={},
             gui={},
             options={}
@@ -20,11 +25,35 @@ function get_make_playerdata(player_index)
     return playerdata
 end
 
+---Gets the base quality name, which is typically "normal" though this may be modified by mods.
+function get_base_quality()
+    local base_quality_name
+    local base_quality_level
+
+    -- Iterate through each quality prototype to identify the one with the lowest level
+    for name, quality_prototype in pairs(prototypes.quality) do
+        if base_quality_name == nil or quality_prototype.level < base_quality_level then
+            base_quality_name = name
+            base_quality_level = quality_prototype.level
+        end
+    end
+
+    return base_quality_name
+end
+
+---Returns GC Requests logistic section for a given player
+---@param player_index uint Player index
+---@return string
+function get_logistic_section_name(player_index)
+    return "Ghost Counter Requests [" .. player_index .. "]"
+end
+
 ---Returns an empty request table for the given item.
 ---@param name string Item name
+---@param quality string Quality name of item
 ---@return Request request
-function make_empty_request(name)
-    return {name=name, count=0, inventory=0, logistic_request={}}
+function make_empty_request(name, quality)
+    return {name=name, quality=quality, count=0, inventory=0, requested=0}
 end
 
 ---Sorts a table of `Request` objects by count, in descending order.
@@ -64,6 +93,7 @@ function get_selection_counts(entities, ignore_tiles)
         local entity_type = entity.type
         if entity_type == "entity-ghost" or (entity_type == "tile-ghost" and not ignore_tiles) then
             local ghost_name = entity.ghost_name
+            local quality = entity.quality.name
             local unit_number = entity.unit_number --[[@as uint]]
 
             -- Get item to place entity, from prototype if necessary
@@ -72,7 +102,7 @@ function get_selection_counts(entities, ignore_tiles)
                                     prototypes.entity[ghost_name] or
                                     prototypes.tile[ghost_name]
                 cache[ghost_name] = {
-                    item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
+                    item = prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
                 }
             end
 
@@ -80,35 +110,52 @@ function get_selection_counts(entities, ignore_tiles)
 
             -- If entity is associated with item, increment request for that item by `item.count`
             local item = cache[ghost_name].item
+
             if item then
-                requests[item.name] = requests[item.name] or make_empty_request(item.name)
-                requests[item.name].count = requests[item.name].count + item.count
-                insert(ghosts[unit_number], item)
+                ---@cast item ItemStackDefinition
+                local name_and_quality = item.name .. "+" .. quality
+
+                requests[name_and_quality] = requests[name_and_quality] or make_empty_request(item.name, quality)
+                requests[name_and_quality].count = requests[name_and_quality].count + item.count
+                insert(ghosts[unit_number], {name=item.name, quality=quality, count=item.count})
             end
 
             -- If entity has module requests, increment request for each module type
             local item_requests = entity_type == "entity-ghost" and entity.item_requests or nil
-            if item_requests and table_size(item_requests) > 0 then
-                for name, val in pairs(item_requests) do
-                    requests[name] = requests[name] or make_empty_request(name)
-                    requests[name].count = requests[name].count + val
-                    insert(ghosts[unit_number], {name=name, count=val})
+            if item_requests and next(item_requests) then
+                for _, item_request in pairs(item_requests) do
+                    local item_request_quality = item_request.quality --[[@as string]]
+                    local name_and_quality = item_request.name .. "+" .. item_request_quality
+
+                    requests[name_and_quality] =
+                        requests[name_and_quality] or make_empty_request(item_request.name, item_request_quality)
+                    requests[name_and_quality].count = requests[name_and_quality].count + item_request.count
+
+                    insert(ghosts[unit_number], {name=item_request.name, quality=item_request_quality, count=item_request.count})
                 end
             end
 
             script.register_on_object_destroyed(entity)
         elseif entity_type == "item-request-proxy" then
             local unit_number = entity.unit_number --[[@as uint]]
+
             ghosts[unit_number] = {}
-            for name, val in pairs(entity.item_requests) do
-                requests[name] = requests[name] or make_empty_request(name)
-                requests[name].count = requests[name].count + val
-                insert(ghosts[unit_number], {name=name, count=val})
+
+            for _, item_request in pairs(entity.item_requests) do
+                local item_request_quality = item_request.quality --[[@as string]]
+                local name_and_quality = item_request.name .. "+" .. item_request_quality
+
+                requests[name_and_quality] =
+                    requests[name_and_quality] or make_empty_request(item_request.name, item_request_quality)
+                requests[name_and_quality].count = requests[name_and_quality].count + item_request.count
+
+                insert(ghosts[unit_number], {name=item_request.name, quality=item_request_quality, count=item_request.count})
             end
             script.register_on_object_destroyed(entity)
         elseif entity.to_be_upgraded() then
             local unit_number = entity.unit_number --[[@as uint]]
             local prototype = entity.get_upgrade_target() --[[@as LuaEntityPrototype]]
+            local quality = entity.quality.name
             local ghost_name = prototype.name
 
             -- Get item to place entity, from prototype if necessary
@@ -123,9 +170,12 @@ function get_selection_counts(entities, ignore_tiles)
             -- If entity is associated with item, increment request for that item by `item.count`
             local item = cache[ghost_name].item
             if item then
-                requests[item.name] = requests[item.name] or make_empty_request(item.name)
-                requests[item.name].count = requests[item.name].count + item.count
-                insert(ghosts[unit_number], item)
+                local name_and_quality = item.name .. "+" .. quality
+
+                requests[name_and_quality] = requests[name_and_quality] or make_empty_request(item.name, quality)
+                requests[name_and_quality].count = requests[name_and_quality].count + item.count
+
+                insert(ghosts[unit_number], {name=item.name, quality=quality, count= item.count})
             end
 
             script.register_on_object_destroyed(entity)
@@ -148,35 +198,47 @@ function get_blueprint_tiles(item_stack)
 end
 
 ---Processes blueprint entities and tiles to generate item request counts.
----@param entities table array of blueprint entities
+---@param entities BlueprintEntity[]? Array of blueprint entities
 ---@param tiles table array of blueprint tiles
 ---@return table requests
 function get_blueprint_counts(entities, tiles)
     local requests = {}
     local cache = {}
+    local base_quality = get_base_quality()
 
     -- Iterate over blueprint entities
-    for _, entity in pairs(entities) do
-        if not cache[entity.name] then
-            local prototype = prototypes.entity[entity.name]
-            cache[entity.name] = {
-                item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
-            }
-        end
+    if entities then
+        for _, entity in pairs(entities) do
+            local entity_name = entity.name
+            local entity_quality = entity.quality or base_quality
 
-        -- If entity is associated with item, increment request for that item by `item.count`
-        local item = cache[entity.name].item
-        if item then
-            requests[item.name] = requests[item.name] or make_empty_request(item.name)
-            requests[item.name].count = requests[item.name].count + item.count
-        end
+            if not cache[entity_name] then
+                local prototype = prototypes.entity[entity_name]
+                cache[entity_name] = {
+                    item=prototype.items_to_place_this and prototype.items_to_place_this[1] or nil
+                }
+            end
 
-        -- If entity has module requests, increment request for each module type
-        local item_requests = entity.items
-        if item_requests and table_size(item_requests) > 0 then
-            for name, val in pairs(item_requests) do
-                requests[name] = requests[name] or make_empty_request(name)
-                requests[name].count = requests[name].count + val
+            -- If entity is associated with item, increment request for that item by `item.count`
+            local item = cache[entity_name].item
+            if item then
+                local name_and_quality = item.name .. "+" .. entity_quality
+
+                requests[name_and_quality] = requests[name_and_quality] or make_empty_request(item.name, entity_quality)
+                requests[name_and_quality].count = requests[name_and_quality].count + item.count
+            end
+
+            -- If entity has module requests, increment request for each module type
+            local item_requests = entity.items
+            if item_requests and next(item_requests) then
+                for _, item_request in pairs(item_requests) do
+                    local name = item_request.id.name --[[@as string]]
+                    local quality = item_request.id.quality --[[@as string]]
+                    local name_and_quality = name .. "+" .. quality
+
+                    requests[name_and_quality] = requests[name_and_quality] or make_empty_request(name, quality)
+                    requests[name_and_quality].count = requests[name_and_quality].count + 1
+                end
             end
         end
     end
@@ -193,17 +255,19 @@ function get_blueprint_counts(entities, tiles)
         -- If tile is associated with item, increment request for that item by `item.count`
         local item = cache[tile.name].item
         if item then
-            requests[item.name] = requests[item.name] or make_empty_request(item.name)
-            requests[item.name].count = requests[item.name].count + item.count
+            local name_and_quality = item.name .. "+" .. base_quality
+
+            requests[name_and_quality] = requests[name_and_quality] or make_empty_request(item.name, base_quality)
+            requests[name_and_quality].count = requests[name_and_quality].count + item.count
         end
     end
 
     return requests
 end
 
----Converts a given player's `Request` table to signals out of a series of constant combinators.
+---Converts a given player's `Request` table to signals out of a constant combinator.
 ---@param player_index uint Player index
-function make_combinators_blueprint(player_index)
+function make_combinator_blueprint(player_index)
     local playerdata = get_make_playerdata(player_index)
 
     -- Make sure constant combinator prototype exists
@@ -213,43 +277,20 @@ function make_combinators_blueprint(player_index)
         return
     end
 
-    local n_slots = prototype.item_slot_count
     local requests = playerdata.job.requests_sorted
-    local request_index = 1
-    local combinators = {}
+    local combinator = {
+        entity_number=1,
+        name="constant-combinator",
+        position={1 - 0.5, 0},
+        direction=4,
+        control_behavior={filters={}},
+        connections={{}}
+    }
 
-    -- Iterate over the number of constant combinators we will need
-    for i = 1, math.ceil(#requests / n_slots) do
-        combinators[i] = {
-            entity_number=i,
-            name="constant-combinator",
-            position={i - 0.5, 0},
-            direction=4,
-            control_behavior={filters={}},
-            connections={{}}
-        }
+    local filters = combinator.control_behavior.filters
 
-        local filters = combinators[i].control_behavior.filters
-
-        -- Set the combinator slots to the ghost request counts
-        for j = 1, n_slots do
-            local request = requests[request_index]
-            filters[j] = {signal={type="item", name=request.name}, count=request.count, index=j}
-
-            -- Increment request index; break if no more requests are left
-            request_index = request_index + 1
-            if request_index > #requests then break end
-        end
-    end
-
-    -- Wire up the combinators to one another
-    if #combinators > 1 then
-        for i = 1, (#combinators - 1) do
-            local connections = combinators[i].connections[1]
-
-            connections["green"] = {{entity_id=i + 1}}
-            connections["red"] = {{entity_id=i + 1}}
-        end
+    for i, request in pairs(requests) do
+        filters[i] = {signal={type="item", name=request.name, quality=request.quality}, count=request.count, index=i}
     end
 
     -- Try to clear the cursor
@@ -257,7 +298,7 @@ function make_combinators_blueprint(player_index)
 
     if is_successful then
         playerdata.luaplayer.cursor_stack.set_stack("blueprint")
-        playerdata.luaplayer.cursor_stack.set_blueprint_entities(combinators)
+        playerdata.luaplayer.cursor_stack.set_blueprint_entities({combinator})
     else
         playerdata.luaplayer.print({"ghost-counter-message.failed-to-clear-cursor"})
     end
@@ -278,17 +319,46 @@ function update_inventory_info(player_index)
     local playerdata = get_make_playerdata(player_index)
     local cursor_stack = playerdata.luaplayer.cursor_stack
     local inventory = playerdata.luaplayer.get_main_inventory()
-    local contents = inventory and inventory.get_contents() or {}
     local requests = playerdata.job.requests
 
     -- Iterate over each request and get the count in inventory
-    for name, request in pairs(requests) do request.inventory = contents[name] or 0 end
+    if inventory then
+        for _, request in pairs(requests) do
+            request.inventory = inventory.get_item_count({name=request.name, quality=request.quality}) or 0
+        end
+    end
 
     -- Add cursor contents to request count
-    if cursor_stack and cursor_stack.valid_for_read and requests[cursor_stack.name] then
-        local request = requests[cursor_stack.name]
-        request.inventory = request.inventory + cursor_stack.count
+    if cursor_stack and cursor_stack.valid_for_read then
+        local name_and_quality = cursor_stack.name .. "+" .. cursor_stack.quality.name
+        if requests[name_and_quality] then
+            local request = requests[name_and_quality]
+            request.inventory = request.inventory + cursor_stack.count
+        end
     end
+end
+
+---Gets the logistic section for mod requests for a given player.
+---@param logistic_point LuaLogisticPoint Character requester logistic point
+---@param player_index uint Player index
+---@return LuaLogisticSection? section Mod's logistic section, if it exists
+function get_logistic_section(player_index, logistic_point)
+    for i = 1, logistic_point.sections_count do
+        local section = logistic_point.sections[i]
+
+        if section.group == get_logistic_section_name(player_index) then
+            return section
+        end
+    end
+end
+
+---Gets (or makes if necessary) a logistic section for mod requests
+---@param logistic_point LuaLogisticPoint Character requester logistic point
+---@param player_index uint Player index
+---@return LuaLogisticSection?
+function get_make_logistic_section(player_index, logistic_point)
+    return get_logistic_section(player_index, logistic_point) or
+        logistic_point.add_section(get_logistic_section_name(player_index))
 end
 
 ---Updates table of `Request`s with the player's current logistic requests.
@@ -301,23 +371,32 @@ function update_logistics_info(player_index)
     local character = playerdata.luaplayer.character
     if not character then return end
 
+    local logistic_point = character.get_logistic_point(defines.logistic_member_index.character_requester)
+
     -- Iterate over each logistic slot and update request table with logistic request details
     local logistic_requests = {}
-    for i = 1, character.request_slot_count do
-        local slot = playerdata.luaplayer.get_personal_logistic_slot(i --[[@as uint]])
-        if requests[slot.name] then
-            requests[slot.name].logistic_request = {slot_index=i, min=slot.min, max=slot.max}
-            logistic_requests[slot.name] = true
+    if logistic_point and logistic_point.filters then
+        for _, slot in pairs(logistic_point.filters) do
+            local name_and_quality = slot.name .. "+" .. slot.quality
+            if requests[name_and_quality] then
+                requests[name_and_quality].requested = slot.count
+                logistic_requests[name_and_quality] = true
+            end
+
+            local temp_request = playerdata.logistic_requests[name_and_quality]
+            if temp_request then
+                temp_request.existing = slot.count - temp_request.new_min
+            end
         end
     end
 
-    -- Clear the `logistic_request` table of the request if one was not found
-    for _, request in pairs(playerdata.job.requests) do
-        if not logistic_requests[request.name] then request.logistic_request = {} end
+    -- Set a request's `requested` property to 0 if no matching request was found
+    for name_and_quality, request in pairs(playerdata.job.requests) do
+        if not logistic_requests[name_and_quality] then request.requested = 0 end
     end
 end
 
----Iterates over one-time requests table and restores old requests if they have been fulfilled.
+---Iterates over one-time requests table and clears request slots if fulfilled.
 ---@param player_index uint Player index
 function update_one_time_logistic_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
@@ -325,151 +404,182 @@ function update_one_time_logistic_requests(player_index)
 
     local inventory = playerdata.luaplayer.get_main_inventory() --[[@as LuaInventory]]
 
-    -- Iterate over one-time requests table and restore old requests if they have been fulfilled
-    for name, logi_req in pairs(playerdata.logistic_requests) do
-        local request = playerdata.job.requests[name]
-        local slot = playerdata.luaplayer.get_personal_logistic_slot(logi_req.slot_index)
+    local logistic_point = playerdata.luaplayer.character.get_logistic_point(defines.logistic_member_index.character_requester)
+    if not logistic_point then return end
 
-        if request then
-            -- Update logistic request to reflect new ghost count
-            if slot.min ~= request.count then
-                local new_slot = {name=name, min=request.count}
-                logi_req.new_min = request.count
-                logi_req.is_new = true
-                playerdata.luaplayer.set_personal_logistic_slot(logi_req.slot_index, new_slot)
-            end
+    local logistic_section = get_logistic_section(player_index, logistic_point)
+    if not logistic_section then return end
 
-            -- Restore prior request (if any) if one-time request has been fulfilled
-            if (inventory.get_item_count(name) >= logi_req.new_min) or
-                (logi_req.new_min <= (logi_req.old_min or 0)) then
-                restore_prior_logistic_request(player_index, name)
+    for i, slot in pairs(logistic_section.filters) do
+        if next(slot) then
+            local name_and_quality = slot.value.name .. "+" .. slot.value.quality
+            local logi_req = playerdata.logistic_requests[name_and_quality]
+
+            if logi_req then
+                local request = playerdata.job.requests[name_and_quality]
+                if request then
+                    if slot.min ~= request.count - logi_req.existing then
+                        slot.min = request.count - logi_req.existing
+                        logi_req.new_min = request.count - logi_req.existing
+                        logi_req.is_new = true
+                        logistic_section.set_slot(i, slot)
+                    end
+                end
+
+                -- Clear slot if one-time request has been fulfilled
+                if inventory and (inventory.get_item_count({name=slot.value.name, quality=slot.value.quality}) >= (logi_req.new_min + logi_req.existing)) then
+                    logistic_section.clear_slot(i)
+                end
             end
         end
     end
 end
 
----Iterates over player's logistic slots and returns the first empty slot. Player _must_ have a
----character entity.
----@param player_index uint Player index
+---Iterates over a logistic section's slots and returns the first empty slot.
+---@param logistic_section LuaLogisticSection Logistic section to find empty slot in
 ---@return uint? slot_index First empty slot
-function get_first_empty_slot(player_index)
-    local playerdata = get_make_playerdata(player_index)
-    local character = playerdata.luaplayer.character --[[@as LuaEntity]]
-
-    for slot_index = 1, character.request_slot_count + 1 do
-        ---@cast slot_index uint
-        local slot = playerdata.luaplayer.get_personal_logistic_slot(slot_index)
-        if slot.name == nil then return slot_index end
+function get_first_empty_slot(logistic_section)
+    for slot_index = 1, logistic_section.filters_count + 1 do
+        local slot = logistic_section.filters[slot_index]
+        if not slot or next(slot) == nil then
+            return slot_index
+        end
     end
 end
 
----Gets a table with details of any existing logistic request for a given item.
----@param player_index uint Player index
+---Gets a table with details of any existing logistic request for a given item within a given logistic section.
+---@param logistic_section LuaLogisticSection Logistic section to search in
 ---@param name string Item name
+---@param quality string Item quality
 ---@return table|nil logistic_request
-function get_existing_logistic_request(player_index, name)
-    local playerdata = get_make_playerdata(player_index)
-    local character = playerdata.luaplayer.character
-    if not character then return nil end
-
-    for i = 1, character.request_slot_count do
-        ---@cast i uint
-        local slot = playerdata.luaplayer.get_personal_logistic_slot(i)
-        if slot and slot.name == name then
-            return {slot_index=i, name=slot.name, min=slot.min, max=slot.max}
+function get_existing_logistic_request(logistic_section, name, quality)
+    for i, slot in pairs(logistic_section.filters) do
+        if next(slot) then
+            if slot.value.name == name and slot.value.quality == quality then
+                return {slot_index=i, min=slot.min}
+            end
         end
     end
+end
+
+---Gets the count of a specific item of certain quality already requested by a logistic point
+---@param logistic_point LuaLogisticPoint Logistic point to evaluate
+---@param name string Item name
+---@param quality string Item quality
+---@return integer
+function get_existing_combined_logistic_request_count(logistic_point, name, quality)
+    if not logistic_point.filters then return 0 end
+
+    for _, filter in pairs(logistic_point.filters) do
+        if filter.name == name and filter.quality == quality and filter.comparator == "=" then
+            return filter.count
+        end
+    end
+
+    -- Return zero if no match was found in the player's combined logistic requests
+    return 0
 end
 
 ---Generates a logistic request or modifies an existing request to satisfy need. Registers the
----change in a `playerdata.logistic_requests` table so that it can be reverted later on.
+---change in a `playerdata.logistic_requests` table.
 ---@param player_index uint Player index
----@param name string `request` name
-function make_one_time_logistic_request(player_index, name)
+---@param name_and_quality string `request` name concatenated with quality level
+function make_one_time_logistic_request(player_index, name_and_quality)
     -- Abort if no player character
     local playerdata = get_make_playerdata(player_index)
     if not playerdata.luaplayer.character then return end
 
     -- Abort if player already has more of item in inventory than needed
-    local request = playerdata.job.requests[name]
+    local request = playerdata.job.requests[name_and_quality]
     if not request or request.inventory >= request.count then return end
 
+    local character = playerdata.luaplayer.character
+    if not character then return end
+
+    local logistic_point = character.get_logistic_point(defines.logistic_member_index.character_requester)
+    if not logistic_point then return end
+
+    local logistic_section = get_make_logistic_section(player_index, logistic_point)
+    if not logistic_section then return end
+
     -- Get any existing request and abort if it would already meet need
-    local existing_request = get_existing_logistic_request(player_index, request.name) or {}
+    local existing_request = get_existing_logistic_request(logistic_section, request.name, request.quality) or {}
     if (existing_request.min or 0) >= request.count then return end
 
+    local combined_request_count = get_existing_combined_logistic_request_count(logistic_point, request.name, request.quality)
+    local new_slot_min = request.count - combined_request_count
+
     -- Prepare new logistic slot and get existing or first empty `slot_index`
-    local new_slot = {name=request.name, min=request.count}
-    local slot_index = existing_request.slot_index or get_first_empty_slot(player_index)
+    local new_slot = {
+        value = {type="item", name=request.name, quality=request.quality},
+        min = new_slot_min
+    }
+
+    local slot_index = existing_request.slot_index or get_first_empty_slot(logistic_section)
     if not slot_index then return end
 
     -- Save details of change in playerdata so that it can be reverted later
     -- This is set here in order for the event handler to be able to identify this change
     -- as originating from the mod and to ignore it.
-    playerdata.logistic_requests[request.name] = {
+    playerdata.logistic_requests[name_and_quality] = {
         slot_index=slot_index,
-        old_min=existing_request.min,
-        old_max=existing_request.max,
-        new_min=request.count,
+        name=request.name,
+        quality=request.quality,
+        existing=combined_request_count,
+        new_min=new_slot_min,
         is_new=true
     }
 
-    -- Actually modify personal logistic slot
-    local is_successful = playerdata.luaplayer.set_personal_logistic_slot(slot_index, new_slot)
+    -- Actually modify logistic section slot
+    logistic_section.set_slot(slot_index, new_slot)
 
-    if is_successful then
-        -- Update request's `logistic_request` table
-        request.logistic_request.slot_index = slot_index
-        request.logistic_request.min = request.count
-        request.logistic_request.max = nil
+    -- Update request with new requested value
+    request.requested = request.count
 
-        playerdata.has_updates = true
-        register_update(player_index, game.tick)
-    else
-        -- Delete record of temporary request as it didn't go through
-        playerdata.logistic_requests[request.name] = nil
-    end
+    register_update(player_index, game.tick)
 end
 
----Restores the prior logistic request (if any) that was in place before the one-time request was
----made.
+---Clear one-time logistic request for a given item+quality pair
 ---@param player_index uint Player index
----@param name string Item name
-function restore_prior_logistic_request(player_index, name)
+---@param name_and_quality string Key to find request in `logistics_requests` table
+function clear_one_time_request(player_index, name_and_quality)
     local playerdata = get_make_playerdata(player_index)
-    if not playerdata.luaplayer.character then return end
+    local character = playerdata.luaplayer.character
+    if not character then return end
 
-    local request = playerdata.logistic_requests[name]
-    local slot
+    local logistic_point = character.get_logistic_point(defines.logistic_member_index.character_requester)
+    if not logistic_point then return end
 
-    -- Either clear or reset slot using old request values
-    if request.old_min or request.old_max then
-        slot = {name=name, min=request.old_min, max=request.old_max}
-        playerdata.luaplayer.set_personal_logistic_slot(request.slot_index, slot)
-    else
-        playerdata.luaplayer.clear_personal_logistic_slot(request.slot_index)
-    end
+    local logistic_section = get_logistic_section(player_index, logistic_point)
+    if not logistic_section then return end
 
-    if playerdata.job.requests[name] then
-        if slot then
-            playerdata.job.requests[name].logistic_request = {
-                slot_index=request.slot_index,
-                min=slot.min,
-                max=slot.max
-            }
-        else
-            playerdata.job.requests[name].logistic_request = {}
-        end
-    end
+    local logistic_request = playerdata.logistic_requests[name_and_quality]
+    if not logistic_request then return end
+
+    logistic_section.clear_slot(logistic_request.slot_index)
 end
 
 ---Iterates over `playerdata.logistic_requests` to get rid of them.
 ---@param player_index uint Player index
 function cancel_all_one_time_requests(player_index)
     local playerdata = get_make_playerdata(player_index)
-    for name, _ in pairs(playerdata.logistic_requests) do
-        restore_prior_logistic_request(player_index, name)
+
+    local character = playerdata.luaplayer.character
+    if not character then return end
+
+    local logistic_point = character.get_logistic_point(defines.logistic_member_index.character_requester)
+    if not logistic_point then return end
+
+    local logistic_section = get_logistic_section(player_index, logistic_point)
+    if not logistic_section then return end
+
+    if logistic_section.filters_count == 0 then return end
+
+    for slot_index, _ in pairs(logistic_section.filters) do
+        logistic_section.clear_slot(slot_index)
     end
+
+    playerdata.logistic_requests = {}
 end
 
 ---Returns the yield of a given item from a single craft of a given recipe.
@@ -526,7 +636,7 @@ end
 ---Crafts a given item; amount to craft based on the corresponding request for that item.
 ---@param player_index uint Player index
 ---@param request Request Request data
----@return "no-character"|"no-crafts-needed"|"attempted" result
+---@return "no-character"|"cannot-craft-quality"|"no-crafts-needed"|"attempted" result
 ---@return uint? items_crafted Number of items crafted
 function craft_request(player_index, request)
     -- Abort if no player character
@@ -536,6 +646,9 @@ function craft_request(player_index, request)
 
     -- Abort if player already has more of item in inventory than needed
     if request.inventory >= request.count then return "no-crafts-needed" end
+
+    -- Abort if quality of item is higher than a player can craft
+    if prototypes.quality[request.quality].level ~= 0 then return "cannot-craft-quality" end
 
     -- Calculate item need; abort if 0 (or less)
     local crafting_yield = get_item_count_from_character_crafting_queue(character, request.name)
@@ -600,13 +713,13 @@ function register_inventory_monitoring(state)
             on_player_main_inventory_changed)
         script.on_event(defines.events.on_player_cursor_stack_changed,
             on_player_main_inventory_changed)
-        script.on_event(defines.events.on_entity_destroyed, on_ghost_destroyed)
+        script.on_event(defines.events.on_object_destroyed, on_ghost_destroyed)
     elseif state == false and storage.events.inventory then
         storage.events.inventory = false
 
         script.on_event(defines.events.on_player_main_inventory_changed, nil)
         script.on_event(defines.events.on_player_cursor_stack_changed, nil)
-        script.on_event(defines.events.on_entity_destroyed, nil)
+        script.on_event(defines.events.on_object_destroyed, nil)
     end
 end
 
@@ -628,7 +741,8 @@ end
 ---@return boolean
 function is_inventory_monitoring_needed()
     for _, playerdata in pairs(storage.playerdata) do
-        if playerdata.is_active and playerdata.luaplayer.connected then return true end
+        if (playerdata.is_active or next(playerdata.logistic_requests)) and
+            playerdata.luaplayer.connected then return true end
     end
     return false
 end
@@ -638,7 +752,7 @@ end
 ---@return boolean
 function is_logistics_monitoring_needed()
     for _, playerdata in pairs(storage.playerdata) do
-        if (playerdata.is_active or table_size(playerdata.logistic_requests) > 0) and
+        if (playerdata.is_active or next(playerdata.logistic_requests)) and
             playerdata.luaplayer.connected then return true end
     end
     return false
