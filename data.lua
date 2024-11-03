@@ -36,7 +36,7 @@ data:extend{
     }, {
         type = "custom-input",
         name = NAME.input.ghost_counter_selection,
-        key_sequence = "ALT + G",
+        key_sequence = "CONTROL + G",
         order = "a",
         action = "lua"
     }, {
