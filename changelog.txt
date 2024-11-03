@@ -1,3 +1,12 @@
+---------------------------------------------------------------------------------------------------
+Version: 2.0.0
+Date: 2024-11-03
+  Features:
+    - Updated to work with 2.0 update.
+    - Added compatability with Quality mechanic.
+  Changes:
+    - Changed how one-time logistic requests work. Now, one time logistic requests are placed in a dedicated logistic section, such that they don't interfere with the player's other requests. The requests are still managed by the mod and cleared once fulfilled.
+    - Changed default hotkey to Ctrl+G in order not to conflict with the default hotkey for green wire. 
   Locale:
     - Added Russian translation, thanks to MikdadAgasiev.
 
