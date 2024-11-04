@@ -594,6 +594,7 @@ function get_yield_per_craft(item_name, recipe)
             local probability = product.probability or 1
             yield = (product.amount) and (product.amount * probability) or
                 ((product.amount_min + product.amount_max) * 0.5 * probability)
+            yield = yield + (product.extra_count_fraction or 0)
             break
         end
     end
