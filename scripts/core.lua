@@ -299,6 +299,7 @@ function make_combinator_blueprint(player_index)
     if is_successful then
         playerdata.luaplayer.cursor_stack.set_stack("blueprint")
         playerdata.luaplayer.cursor_stack.set_blueprint_entities({combinator})
+        playerdata.luaplayer.cursor_stack_temporary = true
     else
         playerdata.luaplayer.print({"ghost-counter-message.failed-to-clear-cursor"})
     end
